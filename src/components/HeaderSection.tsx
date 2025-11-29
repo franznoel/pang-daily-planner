@@ -22,13 +22,13 @@ interface HeaderSectionProps {
 
 // Custom day component for DatePicker
 interface CustomDayProps extends PickersDayProps {
-  datesWithPlans?: string[];
+  datesWithPlansSet?: Set<string>;
 }
 
 function CustomDay(props: CustomDayProps) {
-  const { datesWithPlans = [], day, selected, ...other } = props;
+  const { datesWithPlansSet, day, selected, ...other } = props;
   const dateStr = (day as Dayjs).format("YYYY-MM-DD");
-  const hasRecord = datesWithPlans.includes(dateStr);
+  const hasRecord = datesWithPlansSet?.has(dateStr) ?? false;
 
   if (hasRecord && !selected) {
     return (
@@ -59,6 +59,12 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
   onEnergyLevelChange,
   onMoodChange,
 }) => {
+  // Convert array to Set for O(1) lookups in DatePicker
+  const datesWithPlansSet = React.useMemo(
+    () => new Set(datesWithPlans),
+    [datesWithPlans]
+  );
+
   const handleEnergyLevelChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     // Allow empty string or numbers 1-10
@@ -98,7 +104,7 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
             slotProps={{ textField: { size: "small" } }}
             slots={{
               day: (dayProps) => (
-                <CustomDay {...dayProps} datesWithPlans={datesWithPlans} />
+                <CustomDay {...dayProps} datesWithPlansSet={datesWithPlansSet} />
               ),
             }}
           />

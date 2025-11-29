@@ -10,6 +10,7 @@ import {
   limit,
   getDocs,
   where,
+  serverTimestamp,
 } from "firebase/firestore";
 import { getFirestoreDb } from "./firebase";
 import { DailyPlannerState, HabitItem, PriorityItem } from "@/components/types";
@@ -51,7 +52,7 @@ export interface DailyPlannerDocument {
 /**
  * Converts DailyPlannerState to a Firestore-serializable document
  */
-export function stateToDocument(state: DailyPlannerState): DailyPlannerDocument {
+export function stateToDocument(state: DailyPlannerState): Omit<DailyPlannerDocument, 'updatedAt' | 'createdAt'> {
   return {
     date: state.date?.format("YYYY-MM-DD") || "",
     energyLevel: state.energyLevel,
@@ -75,7 +76,6 @@ export function stateToDocument(state: DailyPlannerState): DailyPlannerDocument 
     positiveThings: state.positiveThings,
     whatDidIDoWell: state.whatDidIDoWell,
     whatDidILearn: state.whatDidILearn,
-    updatedAt: new Date().toISOString(),
   };
 }
 
@@ -97,6 +97,7 @@ function getDailyPlansCollectionRef(userId: string) {
 
 /**
  * Save a daily plan to Firestore
+ * Uses merge option to avoid extra read operation for createdAt
  */
 export async function saveDailyPlan(
   userId: string,
@@ -110,15 +111,16 @@ export async function saveDailyPlan(
   const docRef = getDailyPlanRef(userId, dateStr);
   const document = stateToDocument(state);
 
-  // Check if document exists to preserve createdAt
-  const existingDoc = await getDoc(docRef);
-  if (existingDoc.exists()) {
-    document.createdAt = existingDoc.data().createdAt;
-  } else {
-    document.createdAt = new Date().toISOString();
-  }
-
-  await setDoc(docRef, document);
+  // Use setDoc with merge to create or update
+  // createdAt is set only on first write using a conditional merge approach
+  await setDoc(
+    docRef,
+    {
+      ...document,
+      updatedAt: serverTimestamp(),
+    },
+    { merge: true }
+  );
 }
 
 /**

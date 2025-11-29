@@ -267,18 +267,22 @@ export function useDailyPlanner(): UseDailyPlannerReturn {
 
   // Initial load
   useEffect(() => {
-    if (!user) {
-      setLoading(false);
-      return;
-    }
+    const initializeData = async () => {
+      if (!user) {
+        setLoading(false);
+        return;
+      }
 
-    if (isInitialLoad.current) {
-      isInitialLoad.current = false;
-      const today = dayjs();
-      changeDate(today);
-      loadDatesWithPlans();
-    }
-  }, [user, changeDate, loadDatesWithPlans]);
+      if (isInitialLoad.current) {
+        isInitialLoad.current = false;
+        const today = dayjs();
+        await changeDate(today);
+        // loadDatesWithPlans is already called inside changeDate after saving
+      }
+    };
+    
+    initializeData();
+  }, [user, changeDate]);
 
   // Cleanup timeout on unmount
   useEffect(() => {
