@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { Grid, Divider, Card } from "@mui/material";
-import dayjs, { Dayjs } from "dayjs";
+import dayjs from "dayjs";
 
 import HeaderSection from "./HeaderSection";
 import ThreeListSection from "./ThreeListSection";
@@ -14,50 +14,9 @@ import ScheduleSection from "./ScheduleSection";
 import PrioritiesSection from "./PrioritiesSection";
 import InfinitePossibilitiesSection from "./InfinitePossibilitiesSection";
 import EndOfDayReflection from "./EndOfDayReflection";
+import { DailyPlannerState, HabitItem, PriorityItem } from "./types";
 
-export interface HabitItem {
-  checked: boolean;
-  text: string;
-}
-
-export interface PriorityItem {
-  checked: boolean;
-  text: string;
-}
-
-export interface DailyPlannerState {
-  // Header
-  date: Dayjs | null;
-  energyLevel: string;
-  mood: string;
-  // Three lists
-  gratefulFor: string[];
-  excitedAbout: string[];
-  peopleToSee: string[];
-  // Habits
-  mindHabits: HabitItem[];
-  bodyHabits: HabitItem[];
-  spiritHabits: HabitItem[];
-  // Meals and water
-  meals: string;
-  water: string;
-  // Intention and I Am
-  intention: string;
-  iAm: string;
-  // Schedule (keyed by hour)
-  schedule: Record<string, string>;
-  // Priorities
-  topPriorities: PriorityItem[];
-  professionalPriorities: PriorityItem[];
-  personalPriorities: PriorityItem[];
-  // Infinite possibilities
-  infinitePossibilities: string;
-  // End of day reflection
-  whatInspiredMe: string;
-  positiveThings: string[];
-  whatDidIDoWell: string;
-  whatDidILearn: string;
-}
+export type { HabitItem, PriorityItem, DailyPlannerState };
 
 const createEmptyHabits = (): HabitItem[] =>
   Array(4).fill(null).map(() => ({ checked: false, text: "" }));

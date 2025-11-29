@@ -1,6 +1,6 @@
 import React from "react";
 import { Typography, Stack, Checkbox, TextField } from "@mui/material";
-import { PriorityItem } from "./DailyPlannerPage";
+import { PriorityItem } from "./types";
 
 interface BoxListProps {
   title: string;

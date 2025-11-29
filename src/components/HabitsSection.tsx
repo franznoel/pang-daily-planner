@@ -1,6 +1,6 @@
 import React from "react";
 import { Grid, Typography, Checkbox, TextField, Stack } from "@mui/material";
-import { HabitItem } from "./DailyPlannerPage";
+import { HabitItem } from "./types";
 
 interface HabitColumnProps {
   title: string;
