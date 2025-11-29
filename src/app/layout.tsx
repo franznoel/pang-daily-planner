@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ThemeRegistry } from "@/lib/ThemeRegistry";
 import { ApolloWrapper } from "@/lib/ApolloWrapper";
+import { AuthProvider } from "@/lib/AuthContext";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -17,7 +18,9 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <ApolloWrapper>
-          <ThemeRegistry>{children}</ThemeRegistry>
+          <ThemeRegistry>
+            <AuthProvider>{children}</AuthProvider>
+          </ThemeRegistry>
         </ApolloWrapper>
       </body>
     </html>
