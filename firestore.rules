@@ -20,16 +20,14 @@ service cloud.firestore {
         allow read: if request.auth != null && 
           exists(/databases/$(database)/documents/user/$(userId)/viewers/$(request.auth.token.email));
         
+        // Allow date-specific viewers to read
+        allow read: if request.auth != null && 
+          exists(/databases/$(database)/documents/user/$(userId)/daily-plans/$(date)/viewers/$(request.auth.token.email));
+        
         // Daily plan specific viewers subcollection
         match /viewers/{viewerEmail} {
           allow read, write: if request.auth != null && request.auth.uid == userId;
         }
-      }
-      
-      // Allow viewers to read specific daily plans they have access to
-      match /daily-plans/{date} {
-        allow read: if request.auth != null && 
-          exists(/databases/$(database)/documents/user/$(userId)/daily-plans/$(date)/viewers/$(request.auth.token.email));
       }
     }
   }

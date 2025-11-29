@@ -84,8 +84,9 @@ export default function ShareDialog({ open, onClose, currentDate }: ShareDialogP
         const daily = await getDailyPlanViewers(user.uid, currentDate);
         setDailyPlanViewers(daily);
       }
-    } catch {
-      setError("Failed to load viewers");
+    } catch (err) {
+      console.error("Error loading viewers:", err);
+      setError("Failed to load viewers. Please try closing and reopening this dialog.");
     } finally {
       setLoading(false);
     }
@@ -118,8 +119,9 @@ export default function ShareDialog({ open, onClose, currentDate }: ShareDialogP
       setSuccess(`${newEmail.trim()} can now view all your daily plans`);
       setNewEmail("");
       await loadViewers();
-    } catch {
-      setError("Failed to add viewer");
+    } catch (err) {
+      console.error("Error adding viewer:", err);
+      setError("Failed to add viewer. Please check the email address and try again.");
     } finally {
       setLoading(false);
     }
@@ -133,8 +135,9 @@ export default function ShareDialog({ open, onClose, currentDate }: ShareDialogP
     try {
       await removeGlobalViewer(user.uid, email);
       await loadViewers();
-    } catch {
-      setError("Failed to remove viewer");
+    } catch (err) {
+      console.error("Error removing viewer:", err);
+      setError("Failed to remove viewer. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -156,8 +159,9 @@ export default function ShareDialog({ open, onClose, currentDate }: ShareDialogP
       setSuccess(`${newEmail.trim()} can now view your plan for ${currentDate}`);
       setNewEmail("");
       await loadViewers();
-    } catch {
-      setError("Failed to add viewer");
+    } catch (err) {
+      console.error("Error adding viewer:", err);
+      setError("Failed to add viewer. Please check the email address and try again.");
     } finally {
       setLoading(false);
     }
@@ -171,8 +175,9 @@ export default function ShareDialog({ open, onClose, currentDate }: ShareDialogP
     try {
       await removeDailyPlanViewer(user.uid, currentDate, email);
       await loadViewers();
-    } catch {
-      setError("Failed to remove viewer");
+    } catch (err) {
+      console.error("Error removing viewer:", err);
+      setError("Failed to remove viewer. Please try again.");
     } finally {
       setLoading(false);
     }
