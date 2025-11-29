@@ -6,9 +6,30 @@ service cloud.firestore {
     match /user/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
       
+      // Global viewers subcollection - user/{userId}/viewers/{viewerEmail}
+      match /viewers/{viewerEmail} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+      
       // Daily plans subcollection - user/{userId}/daily-plans/{date}
       match /daily-plans/{date} {
+        // Allow owner full access
         allow read, write: if request.auth != null && request.auth.uid == userId;
+        
+        // Allow global viewers to read
+        allow read: if request.auth != null && 
+          exists(/databases/$(database)/documents/user/$(userId)/viewers/$(request.auth.token.email));
+        
+        // Daily plan specific viewers subcollection
+        match /viewers/{viewerEmail} {
+          allow read, write: if request.auth != null && request.auth.uid == userId;
+        }
+      }
+      
+      // Allow viewers to read specific daily plans they have access to
+      match /daily-plans/{date} {
+        allow read: if request.auth != null && 
+          exists(/databases/$(database)/documents/user/$(userId)/daily-plans/$(date)/viewers/$(request.auth.token.email));
       }
     }
   }

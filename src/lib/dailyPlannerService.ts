@@ -4,6 +4,7 @@ import {
   doc,
   getDoc,
   setDoc,
+  deleteDoc,
   collection,
   query,
   orderBy,
@@ -223,4 +224,173 @@ export function extractIncompletePriorities(priorities: PriorityItem[]): Priorit
     text: priority.text && !priority.checked ? priority.text : "",
     checked: false,
   }));
+}
+
+// ============================================================================
+// VIEWER MANAGEMENT FUNCTIONS
+// ============================================================================
+
+export interface ViewerDocument {
+  email: string;
+  addedAt: string;
+}
+
+/**
+ * Add a viewer to access all of a user's daily plans
+ * Stored at user/{userId}/viewers/{viewerEmail}
+ */
+export async function addGlobalViewer(userId: string, viewerEmail: string): Promise<void> {
+  const db = getFirestoreDb();
+  const viewerRef = doc(db, "user", userId, "viewers", viewerEmail);
+  
+  await setDoc(viewerRef, {
+    email: viewerEmail,
+    addedAt: new Date().toISOString(),
+  });
+}
+
+/**
+ * Remove a global viewer
+ */
+export async function removeGlobalViewer(userId: string, viewerEmail: string): Promise<void> {
+  const db = getFirestoreDb();
+  const viewerRef = doc(db, "user", userId, "viewers", viewerEmail);
+  
+  await deleteDoc(viewerRef);
+}
+
+/**
+ * Get all global viewers for a user
+ */
+export async function getGlobalViewers(userId: string): Promise<ViewerDocument[]> {
+  const db = getFirestoreDb();
+  const viewersRef = collection(db, "user", userId, "viewers");
+  const querySnapshot = await getDocs(viewersRef);
+  
+  return querySnapshot.docs.map((doc) => doc.data() as ViewerDocument);
+}
+
+/**
+ * Add a viewer to access a specific daily plan
+ * Stored at user/{userId}/daily-plans/{date}/viewers/{viewerEmail}
+ */
+export async function addDailyPlanViewer(
+  userId: string,
+  dateStr: string,
+  viewerEmail: string
+): Promise<void> {
+  const db = getFirestoreDb();
+  const viewerRef = doc(db, "user", userId, "daily-plans", dateStr, "viewers", viewerEmail);
+  
+  await setDoc(viewerRef, {
+    email: viewerEmail,
+    addedAt: new Date().toISOString(),
+  });
+}
+
+/**
+ * Remove a viewer from a specific daily plan
+ */
+export async function removeDailyPlanViewer(
+  userId: string,
+  dateStr: string,
+  viewerEmail: string
+): Promise<void> {
+  const db = getFirestoreDb();
+  const viewerRef = doc(db, "user", userId, "daily-plans", dateStr, "viewers", viewerEmail);
+  
+  await deleteDoc(viewerRef);
+}
+
+/**
+ * Get all viewers for a specific daily plan
+ */
+export async function getDailyPlanViewers(
+  userId: string,
+  dateStr: string
+): Promise<ViewerDocument[]> {
+  const db = getFirestoreDb();
+  const viewersRef = collection(db, "user", userId, "daily-plans", dateStr, "viewers");
+  const querySnapshot = await getDocs(viewersRef);
+  
+  return querySnapshot.docs.map((doc) => doc.data() as ViewerDocument);
+}
+
+/**
+ * Check if a user has global viewer access to another user's daily plans
+ */
+export async function isGlobalViewer(ownerUserId: string, viewerEmail: string): Promise<boolean> {
+  const db = getFirestoreDb();
+  const viewerRef = doc(db, "user", ownerUserId, "viewers", viewerEmail);
+  const viewerSnap = await getDoc(viewerRef);
+  
+  return viewerSnap.exists();
+}
+
+/**
+ * Check if a user has viewer access to a specific daily plan
+ */
+export async function isDailyPlanViewer(
+  ownerUserId: string,
+  dateStr: string,
+  viewerEmail: string
+): Promise<boolean> {
+  const db = getFirestoreDb();
+  const viewerRef = doc(db, "user", ownerUserId, "daily-plans", dateStr, "viewers", viewerEmail);
+  const viewerSnap = await getDoc(viewerRef);
+  
+  return viewerSnap.exists();
+}
+
+/**
+ * Check if a user has any viewer access (global or specific date)
+ */
+export async function hasViewerAccess(
+  ownerUserId: string,
+  dateStr: string,
+  viewerEmail: string
+): Promise<boolean> {
+  // Check global access first
+  const hasGlobalAccess = await isGlobalViewer(ownerUserId, viewerEmail);
+  if (hasGlobalAccess) return true;
+  
+  // Check specific daily plan access
+  return isDailyPlanViewer(ownerUserId, dateStr, viewerEmail);
+}
+
+/**
+ * Get a daily plan as a viewer (checks permissions first)
+ */
+export async function getSharedDailyPlan(
+  ownerUserId: string,
+  dateStr: string,
+  viewerEmail: string
+): Promise<DailyPlannerDocument | null> {
+  // Verify viewer access
+  const hasAccess = await hasViewerAccess(ownerUserId, dateStr, viewerEmail);
+  if (!hasAccess) {
+    throw new Error("You do not have permission to view this daily plan");
+  }
+  
+  return getDailyPlan(ownerUserId, dateStr);
+}
+
+/**
+ * Get all shared daily plans accessible by a viewer (from a specific owner)
+ */
+export async function getSharedDatesWithPlans(
+  ownerUserId: string,
+  viewerEmail: string
+): Promise<string[]> {
+  // Check if global viewer
+  const hasGlobalAccess = await isGlobalViewer(ownerUserId, viewerEmail);
+  if (hasGlobalAccess) {
+    // Return all dates
+    return getDatesWithPlans(ownerUserId);
+  }
+  
+  // Otherwise, get dates where user is a specific viewer
+  // This would require a more complex query - for now, return empty
+  // since most use cases will use global viewers
+  return [];
 }
