@@ -45,3 +45,5 @@ jobs:
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_PANG_DAILY_PLANNER }}
           channelId: live
           projectId: pang-daily-planner
+        env:
+            FIREBASE_CLI_EXPERIMENTS: webframeworks
