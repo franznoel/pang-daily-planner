@@ -10,6 +10,13 @@ export interface PriorityItem {
   text: string;
 }
 
+export interface ScheduleEvent {
+  id: string;
+  title: string;
+  start: string;
+  end: string;
+}
+
 export interface DailyPlannerState {
   // Header
   date: Dayjs | null;
@@ -29,8 +36,8 @@ export interface DailyPlannerState {
   // Intention and I Am
   intention: string;
   iAm: string;
-  // Schedule (keyed by hour)
-  schedule: Record<string, string>;
+  // Schedule events for FullCalendar
+  scheduleEvents: ScheduleEvent[];
   // Priorities
   topPriorities: PriorityItem[];
   professionalPriorities: PriorityItem[];

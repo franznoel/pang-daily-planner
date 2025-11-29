@@ -14,9 +14,9 @@ import ScheduleSection from "./ScheduleSection";
 import PrioritiesSection from "./PrioritiesSection";
 import InfinitePossibilitiesSection from "./InfinitePossibilitiesSection";
 import EndOfDayReflection from "./EndOfDayReflection";
-import { DailyPlannerState, HabitItem, PriorityItem } from "./types";
+import { DailyPlannerState, HabitItem, PriorityItem, ScheduleEvent } from "./types";
 
-export type { HabitItem, PriorityItem, DailyPlannerState };
+export type { HabitItem, PriorityItem, DailyPlannerState, ScheduleEvent };
 
 const createEmptyHabits = (): HabitItem[] =>
   Array(4).fill(null).map(() => ({ checked: false, text: "" }));
@@ -39,7 +39,7 @@ const DailyPlannerPage: React.FC = () => {
     water: "",
     intention: "",
     iAm: "",
-    schedule: {},
+    scheduleEvents: [],
     topPriorities: createEmptyPriorities(),
     professionalPriorities: createEmptyPriorities(),
     personalPriorities: createEmptyPriorities(),
@@ -93,10 +93,26 @@ const DailyPlannerPage: React.FC = () => {
     });
   };
 
-  const updateSchedule = (hour: string, value: string) => {
+  const addScheduleEvent = (event: ScheduleEvent) => {
     setState((prev) => ({
       ...prev,
-      schedule: { ...prev.schedule, [hour]: value },
+      scheduleEvents: [...prev.scheduleEvents, event],
+    }));
+  };
+
+  const updateScheduleEvent = (updatedEvent: ScheduleEvent) => {
+    setState((prev) => ({
+      ...prev,
+      scheduleEvents: prev.scheduleEvents.map((event) =>
+        event.id === updatedEvent.id ? updatedEvent : event
+      ),
+    }));
+  };
+
+  const deleteScheduleEvent = (eventId: string) => {
+    setState((prev) => ({
+      ...prev,
+      scheduleEvents: prev.scheduleEvents.filter((event) => event.id !== eventId),
     }));
   };
 
@@ -196,8 +212,11 @@ const DailyPlannerPage: React.FC = () => {
       <Grid container spacing={3} sx={{ mt: 3 }}>
         <Grid size={{ xs: 12, md: 8 }}>
           <ScheduleSection
-            schedule={state.schedule}
-            onScheduleChange={updateSchedule}
+            scheduleEvents={state.scheduleEvents}
+            currentDate={state.date?.format("YYYY-MM-DD") || new Date().toISOString().split("T")[0]}
+            onEventAdd={addScheduleEvent}
+            onEventUpdate={updateScheduleEvent}
+            onEventDelete={deleteScheduleEvent}
           />
         </Grid>
         <Grid size={{ xs: 12, md: 4 }}>
