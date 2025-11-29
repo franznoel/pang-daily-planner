@@ -4,12 +4,16 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:emulators": "firebase emulators:start --only firestore",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "deploy": "firebase deploy --only hosting"
+    "deploy": "firebase deploy --only hosting",
+    "emulators": "firebase emulators:start",
+    "emulators:export": "firebase emulators:export ./emulator-data",
+    "emulators:import": "firebase emulators:start --import=./emulator-data"
   },
   "dependencies": {
     "@apollo/client": "^4.0.9",
@@ -25,6 +29,7 @@
     "@mui/material-nextjs": "^7.3.5",
     "@mui/x-date-pickers": "^8.19.0",
     "dayjs": "^1.11.19",
+    "firebase": "^12.6.0",
     "graphql": "^16.12.0",
     "next": "16.0.5",
     "react": "19.2.0",
