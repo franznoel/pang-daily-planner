@@ -15,6 +15,7 @@ export interface ScheduleEvent {
   title: string;
   start: string;
   end: string;
+  description?: string;
 }
 
 export interface DailyPlannerState {
