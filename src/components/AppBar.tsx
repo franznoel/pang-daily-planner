@@ -41,6 +41,7 @@ export default function AppBar() {
         {user && (
           <Box>
             <Button
+              id="user-menu-button"
               color="inherit"
               onClick={handleClick}
               aria-controls={open ? "user-menu" : undefined}
@@ -55,7 +56,7 @@ export default function AppBar() {
               open={open}
               onClose={handleClose}
               MenuListProps={{
-                "aria-labelledby": "user-button",
+                "aria-labelledby": "user-menu-button",
               }}
             >
               <MenuItem onClick={handleLogout}>Logout</MenuItem>

@@ -2,13 +2,26 @@ import { initializeApp, getApps, FirebaseApp } from "firebase/app";
 import { getFirestore, connectFirestoreEmulator, Firestore } from "firebase/firestore";
 import { getAuth, connectAuthEmulator, GoogleAuthProvider, Auth } from "firebase/auth";
 
+const isDevelopment = process.env.NODE_ENV === "development";
+
+// Demo values for development environment when using emulators
+const demoConfig = {
+  apiKey: "demo-api-key",
+  authDomain: "demo-project.firebaseapp.com",
+  projectId: "demo-project",
+  storageBucket: "demo-project.appspot.com",
+  messagingSenderId: "123456789",
+  appId: "1:123456789:web:abc123",
+};
+
+// Build Firebase config - in production, require env vars; in development, allow demo values
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "demo-api-key",
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "demo-project.firebaseapp.com",
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "demo-project",
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "demo-project.appspot.com",
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "123456789",
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "1:123456789:web:abc123",
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || (isDevelopment ? demoConfig.apiKey : ""),
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || (isDevelopment ? demoConfig.authDomain : ""),
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || (isDevelopment ? demoConfig.projectId : ""),
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || (isDevelopment ? demoConfig.storageBucket : ""),
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || (isDevelopment ? demoConfig.messagingSenderId : ""),
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || (isDevelopment ? demoConfig.appId : ""),
 };
 
 // Track emulator connection status
@@ -31,7 +44,7 @@ function getFirestoreDb(): Firestore {
   if (!db) {
     db = getFirestore(getFirebaseApp());
     // Connect to emulator in development
-    if (typeof window !== "undefined" && process.env.NODE_ENV === "development" && !firestoreEmulatorConnected) {
+    if (typeof window !== "undefined" && isDevelopment && !firestoreEmulatorConnected) {
       connectFirestoreEmulator(db, "localhost", 8081);
       firestoreEmulatorConnected = true;
     }
@@ -43,7 +56,7 @@ function getFirebaseAuth(): Auth {
   if (!auth) {
     auth = getAuth(getFirebaseApp());
     // Connect to emulator in development
-    if (typeof window !== "undefined" && process.env.NODE_ENV === "development" && !authEmulatorConnected) {
+    if (typeof window !== "undefined" && isDevelopment && !authEmulatorConnected) {
       connectAuthEmulator(auth, "http://localhost:9099", { disableWarnings: true });
       authEmulatorConnected = true;
     }
