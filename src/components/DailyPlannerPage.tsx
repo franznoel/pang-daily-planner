@@ -141,7 +141,7 @@ const DailyPlannerPage: React.FC = () => {
   };
 
   return (
-    <Card sx={{ p: 4, maxWidth: 1200, margin: "auto" }}>
+    <Card sx={{ p: 4, maxWidth: 1200, margin: "auto", mt: 4, mb: 7 }}>
       <HeaderSection
         date={state.date}
         energyLevel={state.energyLevel}
