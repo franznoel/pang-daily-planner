@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -45,6 +45,7 @@ const ScheduleSection: React.FC<ScheduleSectionProps> = ({
   onEventUpdate,
   onEventDelete,
 }) => {
+  const calendarRef = useRef<FullCalendar>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [eventData, setEventData] = useState<EventDialogData>({
@@ -53,6 +54,14 @@ const ScheduleSection: React.FC<ScheduleSectionProps> = ({
     endTime: null,
     description: "",
   });
+
+  // Navigate to the selected date when currentDate changes
+  useEffect(() => {
+    if (calendarRef.current) {
+      const calendarApi = calendarRef.current.getApi();
+      calendarApi.gotoDate(currentDate);
+    }
+  }, [currentDate]);
 
   const handleDateSelect = (selectInfo: DateSelectArg) => {
     setIsEditMode(false);
@@ -125,6 +134,7 @@ const ScheduleSection: React.FC<ScheduleSectionProps> = ({
       </Typography>
       <Box sx={{ height: 800 }}>
         <FullCalendar
+          ref={calendarRef}
           plugins={[timeGridPlugin, interactionPlugin]}
           initialView="timeGridDay"
           initialDate={currentDate}
