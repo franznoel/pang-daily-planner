@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { Grid, Divider, Card } from "@mui/material";
-import dayjs from "dayjs";
+import React from "react";
+import { Grid, Divider, Card, CircularProgress, Box } from "@mui/material";
 
 import HeaderSection from "./HeaderSection";
 import ThreeListSection from "./ThreeListSection";
@@ -15,58 +14,22 @@ import PrioritiesSection from "./PrioritiesSection";
 import InfinitePossibilitiesSection from "./InfinitePossibilitiesSection";
 import EndOfDayReflection from "./EndOfDayReflection";
 import { DailyPlannerState, HabitItem, PriorityItem, ScheduleEvent } from "./types";
+import { useDailyPlanner } from "@/lib/useDailyPlanner";
 
 export type { HabitItem, PriorityItem, DailyPlannerState, ScheduleEvent };
 
-const createEmptyHabits = (): HabitItem[] =>
-  Array(4).fill(null).map(() => ({ checked: false, text: "" }));
-
-const createEmptyPriorities = (): PriorityItem[] =>
-  Array(3).fill(null).map(() => ({ checked: false, text: "" }));
-
 const DailyPlannerPage: React.FC = () => {
-  const [state, setState] = useState<DailyPlannerState>({
-    date: dayjs(),
-    energyLevel: "",
-    mood: "",
-    gratefulFor: ["", "", ""],
-    excitedAbout: ["", "", ""],
-    peopleToSee: ["", "", ""],
-    mindHabits: createEmptyHabits(),
-    bodyHabits: createEmptyHabits(),
-    spiritHabits: createEmptyHabits(),
-    meals: "",
-    water: "",
-    intention: "",
-    iAm: "",
-    scheduleEvents: [],
-    topPriorities: createEmptyPriorities(),
-    professionalPriorities: createEmptyPriorities(),
-    personalPriorities: createEmptyPriorities(),
-    infinitePossibilities: "",
-    whatInspiredMe: "",
-    positiveThings: ["", "", ""],
-    whatDidIDoWell: "",
-    whatDidILearn: "",
-  });
-
-  const updateField = <K extends keyof DailyPlannerState>(
-    field: K,
-    value: DailyPlannerState[K]
-  ) => {
-    setState((prev) => ({ ...prev, [field]: value }));
-  };
+  const { state, loading, saving, datesWithPlans, updateField, changeDate } =
+    useDailyPlanner();
 
   const updateListItem = (
     field: "gratefulFor" | "excitedAbout" | "peopleToSee" | "positiveThings",
     index: number,
     value: string
   ) => {
-    setState((prev) => {
-      const newList = [...prev[field]];
-      newList[index] = value;
-      return { ...prev, [field]: newList };
-    });
+    const newList = [...state[field]];
+    newList[index] = value;
+    updateField(field, newList);
   };
 
   const updateHabitText = (
@@ -74,11 +37,9 @@ const DailyPlannerPage: React.FC = () => {
     index: number,
     text: string
   ) => {
-    setState((prev) => {
-      const newHabits = [...prev[field]];
-      newHabits[index] = { ...newHabits[index], text };
-      return { ...prev, [field]: newHabits };
-    });
+    const newHabits = [...state[field]];
+    newHabits[index] = { ...newHabits[index], text };
+    updateField(field, newHabits);
   };
 
   const updateHabitChecked = (
@@ -86,34 +47,29 @@ const DailyPlannerPage: React.FC = () => {
     index: number,
     checked: boolean
   ) => {
-    setState((prev) => {
-      const newHabits = [...prev[field]];
-      newHabits[index] = { ...newHabits[index], checked };
-      return { ...prev, [field]: newHabits };
-    });
+    const newHabits = [...state[field]];
+    newHabits[index] = { ...newHabits[index], checked };
+    updateField(field, newHabits);
   };
 
   const addScheduleEvent = (event: ScheduleEvent) => {
-    setState((prev) => ({
-      ...prev,
-      scheduleEvents: [...prev.scheduleEvents, event],
-    }));
+    updateField("scheduleEvents", [...state.scheduleEvents, event]);
   };
 
   const updateScheduleEvent = (updatedEvent: ScheduleEvent) => {
-    setState((prev) => ({
-      ...prev,
-      scheduleEvents: prev.scheduleEvents.map((event) =>
+    updateField(
+      "scheduleEvents",
+      state.scheduleEvents.map((event) =>
         event.id === updatedEvent.id ? updatedEvent : event
-      ),
-    }));
+      )
+    );
   };
 
   const deleteScheduleEvent = (eventId: string) => {
-    setState((prev) => ({
-      ...prev,
-      scheduleEvents: prev.scheduleEvents.filter((event) => event.id !== eventId),
-    }));
+    updateField(
+      "scheduleEvents",
+      state.scheduleEvents.filter((event) => event.id !== eventId)
+    );
   };
 
   const updatePriorityText = (
@@ -121,11 +77,9 @@ const DailyPlannerPage: React.FC = () => {
     index: number,
     text: string
   ) => {
-    setState((prev) => {
-      const newPriorities = [...prev[field]];
-      newPriorities[index] = { ...newPriorities[index], text };
-      return { ...prev, [field]: newPriorities };
-    });
+    const newPriorities = [...state[field]];
+    newPriorities[index] = { ...newPriorities[index], text };
+    updateField(field, newPriorities);
   };
 
   const updatePriorityChecked = (
@@ -133,12 +87,25 @@ const DailyPlannerPage: React.FC = () => {
     index: number,
     checked: boolean
   ) => {
-    setState((prev) => {
-      const newPriorities = [...prev[field]];
-      newPriorities[index] = { ...newPriorities[index], checked };
-      return { ...prev, [field]: newPriorities };
-    });
+    const newPriorities = [...state[field]];
+    newPriorities[index] = { ...newPriorities[index], checked };
+    updateField(field, newPriorities);
   };
+
+  if (loading) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "50vh",
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <Card sx={{ p: 4, maxWidth: 1200, margin: "auto", mt: 4, mb: 7 }}>
@@ -146,7 +113,10 @@ const DailyPlannerPage: React.FC = () => {
         date={state.date}
         energyLevel={state.energyLevel}
         mood={state.mood}
-        onDateChange={(value) => updateField("date", value)}
+        datesWithPlans={datesWithPlans}
+        loading={loading}
+        saving={saving}
+        onDateChange={changeDate}
         onEnergyLevelChange={(value) => updateField("energyLevel", value)}
         onMoodChange={(value) => updateField("mood", value)}
       />
