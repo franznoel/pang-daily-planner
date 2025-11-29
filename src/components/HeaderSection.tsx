@@ -1,17 +1,7 @@
 "use client";
 
 import React from "react";
-import {
-  Box,
-  TextField,
-  Typography,
-  Stack,
-  FormControl,
-  FormLabel,
-  RadioGroup,
-  FormControlLabel,
-  Radio,
-} from "@mui/material";
+import { Box, TextField, Typography, Stack } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -34,7 +24,18 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
   onEnergyLevelChange,
   onMoodChange,
 }) => {
-  const energyLevels = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+  const handleEnergyLevelChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Allow empty string or numbers 1-10
+    if (value === "") {
+      onEnergyLevelChange(value);
+      return;
+    }
+    const numValue = parseInt(value, 10);
+    if (!isNaN(numValue) && numValue >= 1 && numValue <= 10 && String(numValue) === value) {
+      onEnergyLevelChange(value);
+    }
+  };
 
   return (
     <Box>
@@ -53,28 +54,25 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
           />
         </LocalizationProvider>
         <TextField
+          label="Energy Level (1–10)"
+          size="small"
+          type="number"
+          sx={{ width: "200px" }}
+          value={energyLevel || 10}
+          onChange={handleEnergyLevelChange}
+          slotProps={{
+            htmlInput: {
+              min: 1,
+              max: 10,
+            },
+          }}
+        />
+        <TextField
           label="Mood"
           size="small"
           value={mood}
           onChange={(e) => onMoodChange(e.target.value)}
-        />        
-        <FormControl>
-          <FormLabel>Energy Level (1–10)</FormLabel>
-          <RadioGroup
-            row
-            value={energyLevel}
-            onChange={(e) => onEnergyLevelChange(e.target.value)}
-          >
-            {energyLevels.map((level) => (
-              <FormControlLabel
-                key={level}
-                value={String(level)}
-                control={<Radio size="small" />}
-                label={String(level)}
-              />
-            ))}
-          </RadioGroup>
-        </FormControl>
+        />
       </Stack>
     </Box>
   );
