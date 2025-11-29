@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { User, onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth";
 import { getFirebaseAuth, getGoogleProvider } from "./firebase";
+import { ensureUserDocument } from "./dailyPlannerService";
 
 interface AuthContextType {
   user: User | null;
@@ -19,8 +20,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const auth = getFirebaseAuth();
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setUser(user);
+      
+      // Ensure user document exists when user logs in
+      if (user) {
+        try {
+          await ensureUserDocument(user.uid);
+        } catch (error) {
+          console.error("Error ensuring user document:", error);
+        }
+      }
+      
       setLoading(false);
     });
 
