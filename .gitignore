@@ -47,3 +47,6 @@ storybook-static
 # firebase
 .firebase/
 firebase-debug.log
+emulator-data/
+firestore-debug.log
+ui-debug.log

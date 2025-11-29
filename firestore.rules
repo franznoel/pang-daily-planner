@@ -1,0 +1,17 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Daily planner entries - in development, allow all access
+    // TODO: Add proper authentication rules for production
+    match /dailyPlanners/{userId}/{document=**} {
+      // Allow users to access only their own data
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Fallback rule for development/emulator - remove in production
+    match /dailyPlanners/{document=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
