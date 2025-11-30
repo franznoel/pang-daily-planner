@@ -4,11 +4,18 @@ service cloud.firestore {
   match /databases/{database}/documents {
     // User documents - allow users to access only their own data
     match /user/{userId} {
+      // Allow owner full access
       allow read, write: if request.auth != null && request.auth.uid == userId;
+      
+      // Allow viewers to read user profile (email, displayName)
+      allow read: if request.auth != null && 
+        exists(/databases/$(database)/documents/user/$(userId)/viewers/$(request.auth.token.email));
       
       // Global viewers subcollection - user/{userId}/viewers/{viewerEmail}
       match /viewers/{viewerEmail} {
         allow read, write: if request.auth != null && request.auth.uid == userId;
+        // Allow the viewer to read their own viewer document
+        allow read: if request.auth != null && request.auth.token.email == viewerEmail;
       }
       
       // Daily plans subcollection - user/{userId}/daily-plans/{date}
@@ -27,6 +34,8 @@ service cloud.firestore {
         // Daily plan specific viewers subcollection
         match /viewers/{viewerEmail} {
           allow read, write: if request.auth != null && request.auth.uid == userId;
+          // Allow the viewer to read their own viewer document
+          allow read: if request.auth != null && request.auth.token.email == viewerEmail;
         }
       }
     }

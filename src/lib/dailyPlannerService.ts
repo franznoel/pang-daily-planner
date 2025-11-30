@@ -178,17 +178,33 @@ export async function getDatesWithPlans(userId: string): Promise<string[]> {
 }
 
 /**
- * Check if a user document exists and create it if not
+ * Check if a user document exists and create/update it with user info
  */
-export async function ensureUserDocument(userId: string): Promise<void> {
+export async function ensureUserDocument(
+  userId: string, 
+  email?: string | null, 
+  displayName?: string | null
+): Promise<void> {
   const db = getFirestoreDb();
   const userDocRef = doc(db, "user", userId);
   const userDocSnap = await getDoc(userDocRef);
 
   if (!userDocSnap.exists()) {
     await setDoc(userDocRef, {
+      email: email || "",
+      displayName: displayName || "",
       createdAt: new Date().toISOString(),
     });
+  } else {
+    // Update email and displayName if they've changed
+    const currentData = userDocSnap.data();
+    if (currentData.email !== email || currentData.displayName !== displayName) {
+      await setDoc(userDocRef, {
+        ...currentData,
+        email: email || currentData.email || "",
+        displayName: displayName || currentData.displayName || "",
+      }, { merge: true });
+    }
   }
 }
 

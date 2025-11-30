@@ -26,7 +26,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Ensure user document exists when user logs in
       if (user) {
         try {
-          await ensureUserDocument(user.uid);
+          await ensureUserDocument(user.uid, user.email, user.displayName);
         } catch (error) {
           console.error("Error ensuring user document:", error);
         }
