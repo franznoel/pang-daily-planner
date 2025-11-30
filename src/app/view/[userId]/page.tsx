@@ -286,12 +286,16 @@ function SharedPlanViewContent() {
             <DatePicker
               label="Select Date"
               value={selectedDate}
-              onChange={(newDate) => setSelectedDate(newDate)}
+              onChange={(newDate) => setSelectedDate(newDate ?? dayjs())}
               format="MMMM D, YYYY"
               slotProps={{ textField: { size: "small" } }}
               slots={{
                 day: (dayProps) => {
-                  const dateStr = (dayProps.day as Dayjs).format("YYYY-MM-DD");
+                  const day = dayProps.day as Dayjs | undefined;
+                  if (!day) {
+                    return null;
+                  }
+                  const dateStr = day.format("YYYY-MM-DD");
                   const hasRecord = datesWithPlansSet.has(dateStr);
                   const { selected, ...other } = dayProps;
                   if (hasRecord && !selected) {
@@ -313,7 +317,7 @@ function SharedPlanViewContent() {
                           "&:hover": { backgroundColor: "action.hover" },
                         }}
                       >
-                        {(dayProps.day as Dayjs).date()}
+                        {day.date()}
                       </Box>
                     );
                   }
@@ -335,7 +339,7 @@ function SharedPlanViewContent() {
                         "&:hover": { backgroundColor: "action.hover" },
                       }}
                     >
-                      {(dayProps.day as Dayjs).date()}
+                      {day.date()}
                     </Box>
                   );
                 },
@@ -373,7 +377,7 @@ function SharedPlanViewContent() {
           <>
             <Box sx={{ mb: 3 }}>
               <Typography variant="h5" gutterBottom>
-                {dayjs(plan.date).format("MMMM D, YYYY")}
+                {plan.date ? dayjs(plan.date).format("MMMM D, YYYY") : selectedDate?.format("MMMM D, YYYY") || "Today"}
               </Typography>
               <Grid container spacing={2}>
                 <Grid size={{ xs: 6, md: 3 }}>
