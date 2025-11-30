@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Box, TextField, Typography, Stack, CircularProgress } from "@mui/material";
+import { Box, TextField, Typography, Stack, CircularProgress, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -65,17 +65,8 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
     [datesWithPlans]
   );
 
-  const handleEnergyLevelChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    // Allow empty string or numbers 1-10
-    if (value === "") {
-      onEnergyLevelChange(value);
-      return;
-    }
-    const numValue = parseInt(value, 10);
-    if (!isNaN(numValue) && numValue >= 1 && numValue <= 10 && String(numValue) === value) {
-      onEnergyLevelChange(value);
-    }
+  const handleEnergyLevelChange = (e: SelectChangeEvent) => {
+    onEnergyLevelChange(e.target.value);
   };
 
   return (
@@ -109,20 +100,22 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
             }}
           />
         </LocalizationProvider>
-        <TextField
-          label="Energy Level (1–10)"
-          size="small"
-          type="number"
-          sx={{ width: "200px" }}
-          value={energyLevel || 10}
-          onChange={handleEnergyLevelChange}
-          slotProps={{
-            htmlInput: {
-              min: 1,
-              max: 10,
-            },
-          }}
-        />
+        <FormControl size="small" sx={{ width: "200px" }}>
+          <InputLabel id="energy-level-label">Energy Level (1–10)</InputLabel>
+          <Select
+            labelId="energy-level-label"
+            id="energy-level"
+            value={energyLevel || "10"}
+            label="Energy Level (1–10)"
+            onChange={handleEnergyLevelChange}
+          >
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((level) => (
+              <MenuItem key={level} value={String(level)}>
+                {level}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
         <TextField
           label="Mood"
           size="small"

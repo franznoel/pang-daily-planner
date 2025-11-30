@@ -18,7 +18,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs, { Dayjs } from "dayjs";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
-import interactionPlugin from "@fullcalendar/interaction";
+import interactionPlugin, { DateClickArg } from "@fullcalendar/interaction";
 import { EventClickArg, DateSelectArg } from "@fullcalendar/core";
 import { ScheduleEvent } from "./types";
 
@@ -88,6 +88,27 @@ const ScheduleSection: React.FC<ScheduleSectionProps> = ({
     setDialogOpen(true);
   };
 
+  // Handle single tap/click on empty slots (especially for mobile)
+  const handleDateClick = (dateClickInfo: DateClickArg) => {
+    const clickedTime = dayjs(dateClickInfo.date);
+    let endTime = clickedTime.add(1, "hour");
+    
+    // Ensure end time doesn't exceed the calendar's maximum time (23:00)
+    const maxTime = clickedTime.hour(23).minute(0).second(0);
+    if (endTime.isAfter(maxTime)) {
+      endTime = maxTime;
+    }
+    
+    setIsEditMode(false);
+    setEventData({
+      eventName: "",
+      startTime: clickedTime,
+      endTime: endTime,
+      description: "",
+    });
+    setDialogOpen(true);
+  };
+
   const handleDialogClose = () => {
     setDialogOpen(false);
     setEventData({
@@ -148,6 +169,7 @@ const ScheduleSection: React.FC<ScheduleSectionProps> = ({
           events={scheduleEvents}
           select={handleDateSelect}
           eventClick={handleEventClick}
+          dateClick={handleDateClick}
           height="100%"
         />
       </Box>
