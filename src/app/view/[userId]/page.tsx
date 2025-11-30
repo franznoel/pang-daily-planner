@@ -303,6 +303,7 @@ function SharedPlanViewContent() {
                   const dateStr = day.format("YYYY-MM-DD");
                   const hasRecord = datesWithPlansSet.has(dateStr);
                   const { selected, onClick, ...other } = dayProps;
+                  const shouldShowBorder = hasRecord && !selected;
 
                   // Only clickable if hasRecord
                   return (
@@ -313,8 +314,8 @@ function SharedPlanViewContent() {
                       onClick={hasRecord ? onClick : undefined}
                       tabIndex={hasRecord ? 0 : -1}
                       sx={{
-                        border: hasRecord && !selected ? "2px solid" : "none",
-                        borderColor: hasRecord && !selected ? "primary.main" : undefined,
+                        border: shouldShowBorder ? "2px solid" : "none",
+                        borderColor: shouldShowBorder ? "primary.main" : undefined,
                         borderRadius: "50%",
                         background: selected ? "primary.main" : "none",
                         color: selected ? "white" : "inherit",
