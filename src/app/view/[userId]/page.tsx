@@ -19,6 +19,7 @@ import {
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { PickersDay, PickersDayProps } from "@mui/x-date-pickers/PickersDay";
 import dayjs, { Dayjs } from "dayjs";
 import { useAuth } from "@/lib/AuthContext";
 import {
@@ -295,42 +296,33 @@ function SharedPlanViewContent() {
               format="MMMM D, YYYY"
               slotProps={{ textField: { size: "small" } }}
               slots={{
-                day: (dayProps) => {
+                day: (dayProps: PickersDayProps) => {
                   const day = dayProps.day as Dayjs | undefined;
                   if (!day) {
                     return null;
                   }
                   const dateStr = day.format("YYYY-MM-DD");
                   const hasRecord = datesWithPlansSet.has(dateStr);
-                  const { selected, onClick, ...other } = dayProps;
+                  const { selected, ...other } = dayProps;
                   const shouldShowBorder = hasRecord && !selected;
 
-                  // Only clickable if hasRecord
                   return (
-                    <Box
-                      component="button"
+                    <PickersDay
                       {...other}
+                      day={day}
+                      selected={selected}
                       disabled={!hasRecord}
-                      onClick={hasRecord ? onClick : undefined}
-                      tabIndex={hasRecord ? 0 : -1}
                       sx={{
                         border: shouldShowBorder ? "2px solid" : "none",
                         borderColor: shouldShowBorder ? "primary.main" : undefined,
                         borderRadius: "50%",
-                        background: selected ? "primary.main" : "none",
-                        color: selected ? "white" : "inherit",
-                        cursor: hasRecord ? "pointer" : "not-allowed",
                         opacity: hasRecord ? 1 : 0.5,
-                        width: 36,
-                        height: 36,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        "&:hover": hasRecord ? { backgroundColor: "action.hover" } : {},
+                        cursor: hasRecord ? "pointer" : "not-allowed",
+                        "&.Mui-disabled": {
+                          opacity: 0.5,
+                        },
                       }}
-                    >
-                      {day.date()}
-                    </Box>
+                    />
                   );
                 },
               }}
