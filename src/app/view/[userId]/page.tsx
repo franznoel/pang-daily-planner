@@ -286,7 +286,12 @@ function SharedPlanViewContent() {
             <DatePicker
               label="Select Date"
               value={selectedDate}
-              onChange={(newDate) => setSelectedDate(newDate ?? dayjs())}
+              onChange={(newDate) => {
+                // Only allow selection if newDate is in datesWithPlansSet
+                if (newDate && datesWithPlansSet.has(newDate.format("YYYY-MM-DD"))) {
+                  setSelectedDate(newDate);
+                }
+              }}
               format="MMMM D, YYYY"
               slotProps={{ textField: { size: "small" } }}
               slots={{
@@ -297,46 +302,30 @@ function SharedPlanViewContent() {
                   }
                   const dateStr = day.format("YYYY-MM-DD");
                   const hasRecord = datesWithPlansSet.has(dateStr);
-                  const { selected, ...other } = dayProps;
-                  if (hasRecord && !selected) {
-                    return (
-                      <Box
-                        component="button"
-                        {...other}
-                        sx={{
-                          border: "2px solid",
-                          borderColor: "primary.main",
-                          borderRadius: "50%",
-                          background: "none",
-                          cursor: "pointer",
-                          width: 36,
-                          height: 36,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          "&:hover": { backgroundColor: "action.hover" },
-                        }}
-                      >
-                        {day.date()}
-                      </Box>
-                    );
-                  }
+                  const { selected, onClick, ...other } = dayProps;
+
+                  // Only clickable if hasRecord
                   return (
                     <Box
                       component="button"
                       {...other}
+                      disabled={!hasRecord}
+                      onClick={hasRecord ? onClick : undefined}
+                      tabIndex={hasRecord ? 0 : -1}
                       sx={{
+                        border: hasRecord && !selected ? "2px solid" : "none",
+                        borderColor: hasRecord && !selected ? "primary.main" : undefined,
+                        borderRadius: "50%",
                         background: selected ? "primary.main" : "none",
                         color: selected ? "white" : "inherit",
-                        borderRadius: "50%",
-                        border: "none",
-                        cursor: "pointer",
+                        cursor: hasRecord ? "pointer" : "not-allowed",
+                        opacity: hasRecord ? 1 : 0.5,
                         width: 36,
                         height: 36,
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        "&:hover": { backgroundColor: "action.hover" },
+                        "&:hover": hasRecord ? { backgroundColor: "action.hover" } : {},
                       }}
                     >
                       {day.date()}
