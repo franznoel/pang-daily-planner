@@ -91,7 +91,13 @@ const ScheduleSection: React.FC<ScheduleSectionProps> = ({
   // Handle single tap/click on empty slots (especially for mobile)
   const handleDateClick = (dateClickInfo: DateClickArg) => {
     const clickedTime = dayjs(dateClickInfo.date);
-    const endTime = clickedTime.add(1, "hour");
+    let endTime = clickedTime.add(1, "hour");
+    
+    // Ensure end time doesn't exceed the calendar's maximum time (23:00)
+    const maxTime = clickedTime.hour(23).minute(0).second(0);
+    if (endTime.isAfter(maxTime)) {
+      endTime = maxTime;
+    }
     
     setIsEditMode(false);
     setEventData({
