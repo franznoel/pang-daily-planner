@@ -4,11 +4,53 @@ service cloud.firestore {
   match /databases/{database}/documents {
     // User documents - allow users to access only their own data
     match /user/{userId} {
+      // Allow owner full access
       allow read, write: if request.auth != null && request.auth.uid == userId;
+      
+      // Allow viewers to read user profile (email, displayName)
+      allow read: if request.auth != null && 
+        exists(/databases/$(database)/documents/user/$(userId)/viewers/$(request.auth.token.email));
+      
+      // Global viewers subcollection - user/{userId}/viewers/{viewerEmail}
+      match /viewers/{viewerEmail} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+        // Allow the viewer to read their own viewer document
+        allow read: if request.auth != null && request.auth.token.email == viewerEmail;
+      }
       
       // Daily plans subcollection - user/{userId}/daily-plans/{date}
       match /daily-plans/{date} {
+        // Allow owner full access
         allow read, write: if request.auth != null && request.auth.uid == userId;
+        
+        // Allow global viewers to read
+        allow read: if request.auth != null && 
+          exists(/databases/$(database)/documents/user/$(userId)/viewers/$(request.auth.token.email));
+        
+        // Allow date-specific viewers to read
+        allow read: if request.auth != null && 
+          exists(/databases/$(database)/documents/user/$(userId)/daily-plans/$(date)/viewers/$(request.auth.token.email));
+        
+        // Daily plan specific viewers subcollection
+        match /viewers/{viewerEmail} {
+          allow read, write: if request.auth != null && request.auth.uid == userId;
+          // Allow the viewer to read their own viewer document
+          allow read: if request.auth != null && request.auth.token.email == viewerEmail;
+        }
+      }
+    }
+    
+    // Shared with me collection - tracks who has shared their plans with each user
+    // Allows users to discover planners shared with them
+    match /sharedWithMe/{viewerEmail} {
+      // Allow read access to the user whose email matches
+      allow read: if request.auth != null && request.auth.token.email == viewerEmail;
+      
+      match /owners/{ownerId} {
+        // Allow read if the viewer's email matches
+        allow read: if request.auth != null && request.auth.token.email == viewerEmail;
+        // Allow write by the owner who is sharing
+        allow write: if request.auth != null && request.auth.uid == ownerId;
       }
     }
   }

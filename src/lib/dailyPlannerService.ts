@@ -4,6 +4,7 @@ import {
   doc,
   getDoc,
   setDoc,
+  deleteDoc,
   collection,
   query,
   orderBy,
@@ -177,17 +178,33 @@ export async function getDatesWithPlans(userId: string): Promise<string[]> {
 }
 
 /**
- * Check if a user document exists and create it if not
+ * Check if a user document exists and create/update it with user info
  */
-export async function ensureUserDocument(userId: string): Promise<void> {
+export async function ensureUserDocument(
+  userId: string, 
+  email?: string | null, 
+  displayName?: string | null
+): Promise<void> {
   const db = getFirestoreDb();
   const userDocRef = doc(db, "user", userId);
   const userDocSnap = await getDoc(userDocRef);
 
   if (!userDocSnap.exists()) {
     await setDoc(userDocRef, {
+      email: email || "",
+      displayName: displayName || "",
       createdAt: new Date().toISOString(),
     });
+  } else {
+    // Update email and displayName if they've changed
+    const currentData = userDocSnap.data();
+    if (currentData.email !== email || currentData.displayName !== displayName) {
+      await setDoc(userDocRef, {
+        ...currentData,
+        email: email || currentData.email || "",
+        displayName: displayName || currentData.displayName || "",
+      }, { merge: true });
+    }
   }
 }
 
@@ -223,4 +240,210 @@ export function extractIncompletePriorities(priorities: PriorityItem[]): Priorit
     text: priority.text && !priority.checked ? priority.text : "",
     checked: false,
   }));
+}
+
+// ============================================================================
+// VIEWER MANAGEMENT FUNCTIONS
+// ============================================================================
+
+export interface ViewerDocument {
+  email: string;
+  addedAt: string;
+}
+
+export interface SharedOwnerDocument {
+  ownerId: string;
+  ownerEmail?: string;
+  sharedAt: string;
+  type: "global" | "daily";
+}
+
+/**
+ * Add a viewer to access all of a user's daily plans
+ * Stored at user/{userId}/viewers/{viewerEmail}
+ * Also adds reverse mapping at sharedWithMe/{viewerEmail}/owners/{ownerId}
+ */
+export async function addGlobalViewer(
+  userId: string, 
+  viewerEmail: string,
+  ownerEmail?: string
+): Promise<void> {
+  const db = getFirestoreDb();
+  const viewerRef = doc(db, "user", userId, "viewers", viewerEmail);
+  const sharedWithMeRef = doc(db, "sharedWithMe", viewerEmail, "owners", userId);
+  
+  const timestamp = new Date().toISOString();
+  
+  await setDoc(viewerRef, {
+    email: viewerEmail,
+    addedAt: timestamp,
+  });
+  
+  // Add reverse mapping so viewer can discover who shared with them
+  await setDoc(sharedWithMeRef, {
+    ownerId: userId,
+    ownerEmail: ownerEmail || "",
+    sharedAt: timestamp,
+    type: "global",
+  });
+}
+
+/**
+ * Remove a global viewer
+ * Also removes reverse mapping
+ */
+export async function removeGlobalViewer(userId: string, viewerEmail: string): Promise<void> {
+  const db = getFirestoreDb();
+  const viewerRef = doc(db, "user", userId, "viewers", viewerEmail);
+  const sharedWithMeRef = doc(db, "sharedWithMe", viewerEmail, "owners", userId);
+  
+  await deleteDoc(viewerRef);
+  await deleteDoc(sharedWithMeRef);
+}
+
+/**
+ * Get all global viewers for a user
+ */
+export async function getGlobalViewers(userId: string): Promise<ViewerDocument[]> {
+  const db = getFirestoreDb();
+  const viewersRef = collection(db, "user", userId, "viewers");
+  const querySnapshot = await getDocs(viewersRef);
+  
+  return querySnapshot.docs.map((doc) => doc.data() as ViewerDocument);
+}
+
+/**
+ * Add a viewer to access a specific daily plan
+ * Stored at user/{userId}/daily-plans/{date}/viewers/{viewerEmail}
+ */
+export async function addDailyPlanViewer(
+  userId: string,
+  dateStr: string,
+  viewerEmail: string
+): Promise<void> {
+  const db = getFirestoreDb();
+  const viewerRef = doc(db, "user", userId, "daily-plans", dateStr, "viewers", viewerEmail);
+  
+  await setDoc(viewerRef, {
+    email: viewerEmail,
+    addedAt: new Date().toISOString(),
+  });
+}
+
+/**
+ * Remove a viewer from a specific daily plan
+ */
+export async function removeDailyPlanViewer(
+  userId: string,
+  dateStr: string,
+  viewerEmail: string
+): Promise<void> {
+  const db = getFirestoreDb();
+  const viewerRef = doc(db, "user", userId, "daily-plans", dateStr, "viewers", viewerEmail);
+  
+  await deleteDoc(viewerRef);
+}
+
+/**
+ * Get all viewers for a specific daily plan
+ */
+export async function getDailyPlanViewers(
+  userId: string,
+  dateStr: string
+): Promise<ViewerDocument[]> {
+  const db = getFirestoreDb();
+  const viewersRef = collection(db, "user", userId, "daily-plans", dateStr, "viewers");
+  const querySnapshot = await getDocs(viewersRef);
+  
+  return querySnapshot.docs.map((doc) => doc.data() as ViewerDocument);
+}
+
+/**
+ * Check if a user has global viewer access to another user's daily plans
+ */
+export async function isGlobalViewer(ownerUserId: string, viewerEmail: string): Promise<boolean> {
+  const db = getFirestoreDb();
+  const viewerRef = doc(db, "user", ownerUserId, "viewers", viewerEmail);
+  const viewerSnap = await getDoc(viewerRef);
+  
+  return viewerSnap.exists();
+}
+
+/**
+ * Check if a user has viewer access to a specific daily plan
+ */
+export async function isDailyPlanViewer(
+  ownerUserId: string,
+  dateStr: string,
+  viewerEmail: string
+): Promise<boolean> {
+  const db = getFirestoreDb();
+  const viewerRef = doc(db, "user", ownerUserId, "daily-plans", dateStr, "viewers", viewerEmail);
+  const viewerSnap = await getDoc(viewerRef);
+  
+  return viewerSnap.exists();
+}
+
+/**
+ * Check if a user has any viewer access (global or specific date)
+ */
+export async function hasViewerAccess(
+  ownerUserId: string,
+  dateStr: string,
+  viewerEmail: string
+): Promise<boolean> {
+  // Check global access first
+  const hasGlobalAccess = await isGlobalViewer(ownerUserId, viewerEmail);
+  if (hasGlobalAccess) return true;
+  
+  // Check specific daily plan access
+  return isDailyPlanViewer(ownerUserId, dateStr, viewerEmail);
+}
+
+/**
+ * Get a daily plan as a viewer (checks permissions first)
+ */
+export async function getSharedDailyPlan(
+  ownerUserId: string,
+  dateStr: string,
+  viewerEmail: string
+): Promise<DailyPlannerDocument | null> {
+  // Verify viewer access
+  const hasAccess = await hasViewerAccess(ownerUserId, dateStr, viewerEmail);
+  if (!hasAccess) {
+    throw new Error("You do not have permission to view this daily plan");
+  }
+  
+  return getDailyPlan(ownerUserId, dateStr);
+}
+
+/**
+ * Get all shared daily plans accessible by a viewer (from a specific owner)
+ */
+export async function getSharedDatesWithPlans(
+  ownerUserId: string,
+  viewerEmail: string
+): Promise<string[]> {
+  // Check if global viewer
+  const hasGlobalAccess = await isGlobalViewer(ownerUserId, viewerEmail);
+  if (hasGlobalAccess) {
+    // Return all dates
+    return getDatesWithPlans(ownerUserId);
+  }
+  
+  // Otherwise, get dates where user is a specific viewer
+  // This would require a more complex query - for now, return empty
+  // since most use cases will use global viewers
+  return [];
+}
+
+/**
+ * Get all users who have shared their daily plans with the current user
+ */
+export async function getSharedWithMe(viewerEmail: string): Promise<SharedOwnerDocument[]> {
+  const db = getFirestoreDb();
+  const ownersRef = collection(db, "sharedWithMe", viewerEmail, "owners");
+  const querySnapshot = await getDocs(ownersRef);
+  
+  return querySnapshot.docs.map((doc) => doc.data() as SharedOwnerDocument);
 }
