@@ -115,7 +115,7 @@ export default function ShareDialog({ open, onClose, currentDate }: ShareDialogP
     setError(null);
     setSuccess(null);
     try {
-      await addGlobalViewer(user.uid, newEmail.trim());
+      await addGlobalViewer(user.uid, newEmail.trim(), user.email || undefined);
       setSuccess(`${newEmail.trim()} can now view all your daily plans`);
       setNewEmail("");
       await loadViewers();

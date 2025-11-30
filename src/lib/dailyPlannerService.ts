@@ -235,28 +235,54 @@ export interface ViewerDocument {
   addedAt: string;
 }
 
+export interface SharedOwnerDocument {
+  ownerId: string;
+  ownerEmail?: string;
+  sharedAt: string;
+  type: "global" | "daily";
+}
+
 /**
  * Add a viewer to access all of a user's daily plans
  * Stored at user/{userId}/viewers/{viewerEmail}
+ * Also adds reverse mapping at sharedWithMe/{viewerEmail}/owners/{ownerId}
  */
-export async function addGlobalViewer(userId: string, viewerEmail: string): Promise<void> {
+export async function addGlobalViewer(
+  userId: string, 
+  viewerEmail: string,
+  ownerEmail?: string
+): Promise<void> {
   const db = getFirestoreDb();
   const viewerRef = doc(db, "user", userId, "viewers", viewerEmail);
+  const sharedWithMeRef = doc(db, "sharedWithMe", viewerEmail, "owners", userId);
+  
+  const timestamp = new Date().toISOString();
   
   await setDoc(viewerRef, {
     email: viewerEmail,
-    addedAt: new Date().toISOString(),
+    addedAt: timestamp,
+  });
+  
+  // Add reverse mapping so viewer can discover who shared with them
+  await setDoc(sharedWithMeRef, {
+    ownerId: userId,
+    ownerEmail: ownerEmail || "",
+    sharedAt: timestamp,
+    type: "global",
   });
 }
 
 /**
  * Remove a global viewer
+ * Also removes reverse mapping
  */
 export async function removeGlobalViewer(userId: string, viewerEmail: string): Promise<void> {
   const db = getFirestoreDb();
   const viewerRef = doc(db, "user", userId, "viewers", viewerEmail);
+  const sharedWithMeRef = doc(db, "sharedWithMe", viewerEmail, "owners", userId);
   
   await deleteDoc(viewerRef);
+  await deleteDoc(sharedWithMeRef);
 }
 
 /**
@@ -393,4 +419,15 @@ export async function getSharedDatesWithPlans(
   // This would require a more complex query - for now, return empty
   // since most use cases will use global viewers
   return [];
+}
+
+/**
+ * Get all users who have shared their daily plans with the current user
+ */
+export async function getSharedWithMe(viewerEmail: string): Promise<SharedOwnerDocument[]> {
+  const db = getFirestoreDb();
+  const ownersRef = collection(db, "sharedWithMe", viewerEmail, "owners");
+  const querySnapshot = await getDocs(ownersRef);
+  
+  return querySnapshot.docs.map((doc) => doc.data() as SharedOwnerDocument);
 }

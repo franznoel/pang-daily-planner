@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   AppBar as MuiAppBar,
   Toolbar,
@@ -13,6 +14,7 @@ import {
   Tooltip,
 } from "@mui/material";
 import ShareIcon from "@mui/icons-material/Share";
+import PeopleIcon from "@mui/icons-material/People";
 import { useAuth } from "@/lib/AuthContext";
 import ShareDialog from "./ShareDialog";
 
@@ -22,6 +24,7 @@ interface AppBarProps {
 
 export default function AppBar({ currentDate }: AppBarProps) {
   const { user, logout } = useAuth();
+  const router = useRouter();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const open = Boolean(anchorEl);
@@ -39,6 +42,10 @@ export default function AppBar({ currentDate }: AppBarProps) {
     await logout();
   };
 
+  const handleSharedWithMe = () => {
+    router.push("/shared");
+  };
+
   const displayName = user?.displayName || user?.email || "User";
 
   return (
@@ -50,6 +57,15 @@ export default function AppBar({ currentDate }: AppBarProps) {
           </Typography>
           {user && (
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <Tooltip title="Planners shared with me">
+                <IconButton
+                  color="inherit"
+                  onClick={handleSharedWithMe}
+                  aria-label="shared with me"
+                >
+                  <PeopleIcon />
+                </IconButton>
+              </Tooltip>
               <Tooltip title="Share your planner">
                 <IconButton
                   color="inherit"

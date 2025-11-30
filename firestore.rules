@@ -30,5 +30,19 @@ service cloud.firestore {
         }
       }
     }
+    
+    // Shared with me collection - tracks who has shared their plans with each user
+    // Allows users to discover planners shared with them
+    match /sharedWithMe/{viewerEmail} {
+      // Allow read access to the user whose email matches
+      allow read: if request.auth != null && request.auth.token.email == viewerEmail;
+      
+      match /owners/{ownerId} {
+        // Allow read if the viewer's email matches
+        allow read: if request.auth != null && request.auth.token.email == viewerEmail;
+        // Allow write by the owner who is sharing
+        allow write: if request.auth != null && request.auth.uid == ownerId;
+      }
+    }
   }
 }
