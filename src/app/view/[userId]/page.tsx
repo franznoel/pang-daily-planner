@@ -10,11 +10,6 @@ import {
   Alert,
   Divider,
   Grid,
-  AppBar as MuiAppBar,
-  Toolbar,
-  Button,
-  Menu,
-  MenuItem,
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -25,9 +20,11 @@ import { useAuth } from "@/lib/AuthContext";
 import {
   getSharedDailyPlan,
   getSharedDatesWithPlans,
+  getUserInfo,
   DailyPlannerDocument,
 } from "@/lib/dailyPlannerService";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import AppBar from "@/components/AppBar";
 
 // Read-only display components
 function ReadOnlyField({ label, value }: { label: string; value: string }) {
@@ -165,28 +162,28 @@ function ReadOnlySchedule({
 function SharedPlanViewContent() {
   const params = useParams();
   const userId = params.userId as string;
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
 
   const [selectedDate, setSelectedDate] = useState<Dayjs | null>(dayjs());
   const [plan, setPlan] = useState<DailyPlannerDocument | null>(null);
   const [datesWithPlans, setDatesWithPlans] = useState<string[]>([]);
+  const [ownerDisplayName, setOwnerDisplayName] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const open = Boolean(anchorEl);
 
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
-  const handleLogout = async () => {
-    handleClose();
-    await logout();
-  };
+  const loadOwnerInfo = useCallback(async () => {
+    try {
+      const userInfo = await getUserInfo(userId);
+      if (userInfo) {
+        setOwnerDisplayName(userInfo.displayName?.trim() || userInfo.email?.trim() || userId);
+      } else {
+        setOwnerDisplayName(userId);
+      }
+    } catch (err) {
+      console.error("Error loading owner info:", err);
+      setOwnerDisplayName(userId);
+    }
+  }, [userId]);
 
   const loadPlan = useCallback(
     async (dateStr: string) => {
@@ -232,47 +229,18 @@ function SharedPlanViewContent() {
     loadDatesWithPlans();
   }, [loadDatesWithPlans]);
 
+  useEffect(() => {
+    loadOwnerInfo();
+  }, [loadOwnerInfo]);
+
   const datesWithPlansSet = React.useMemo(
     () => new Set(datesWithPlans),
     [datesWithPlans]
   );
 
-  const displayName = user?.displayName || user?.email || "User";
-
   return (
     <>
-      <MuiAppBar position="static">
-        <Toolbar>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Shared Daily Planner
-          </Typography>
-          {user && (
-            <Box>
-              <Button
-                id="user-menu-button"
-                color="inherit"
-                onClick={handleClick}
-                aria-controls={open ? "user-menu" : undefined}
-                aria-haspopup="true"
-                aria-expanded={open ? "true" : undefined}
-              >
-                {displayName}
-              </Button>
-              <Menu
-                id="user-menu"
-                anchorEl={anchorEl}
-                open={open}
-                onClose={handleClose}
-                MenuListProps={{
-                  "aria-labelledby": "user-menu-button",
-                }}
-              >
-                <MenuItem onClick={handleLogout}>Logout</MenuItem>
-              </Menu>
-            </Box>
-          )}
-        </Toolbar>
-      </MuiAppBar>
+      <AppBar title="Shared Daily Planner" showHomeLink />
 
       <Card sx={{ p: 4, maxWidth: 1200, margin: "auto", mt: 4, mb: 7 }}>
         <Box sx={{ mb: 3 }}>
@@ -280,7 +248,7 @@ function SharedPlanViewContent() {
             Viewing Shared Plan
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            You are viewing plans shared by user: {userId}
+            You are viewing plans shared by: {ownerDisplayName || userId}
           </Typography>
 
           <LocalizationProvider dateAdapter={AdapterDayjs}>
