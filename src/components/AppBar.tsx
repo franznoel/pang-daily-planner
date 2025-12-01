@@ -6,15 +6,18 @@ import {
   AppBar as MuiAppBar,
   Toolbar,
   Typography,
-  Button,
   Menu,
   MenuItem,
   Box,
   IconButton,
-  Tooltip,
+  Avatar,
+  Divider,
+  ListItemIcon,
+  ListItemText,
 } from "@mui/material";
 import ShareIcon from "@mui/icons-material/Share";
 import PeopleIcon from "@mui/icons-material/People";
+import LogoutIcon from "@mui/icons-material/Logout";
 import { useAuth } from "@/lib/AuthContext";
 import ShareDialog from "./ShareDialog";
 
@@ -29,7 +32,7 @@ export default function AppBar({ currentDate }: AppBarProps) {
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const open = Boolean(anchorEl);
 
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
 
@@ -43,10 +46,25 @@ export default function AppBar({ currentDate }: AppBarProps) {
   };
 
   const handleSharedWithMe = () => {
+    handleClose();
     router.push("/shared");
   };
 
-  const displayName = user?.displayName || user?.email || "User";
+  const handleSharePlanner = () => {
+    handleClose();
+    setShareDialogOpen(true);
+  };
+
+  // Get the first letter of the first name for fallback avatar
+  const getAvatarLetter = () => {
+    if (user?.displayName) {
+      return user.displayName.charAt(0).toUpperCase();
+    }
+    if (user?.email) {
+      return user.email.charAt(0).toUpperCase();
+    }
+    return "U";
+  };
 
   return (
     <>
@@ -56,35 +74,23 @@ export default function AppBar({ currentDate }: AppBarProps) {
             Daily Planner
           </Typography>
           {user && (
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <Tooltip title="Planners shared with me">
-                <IconButton
-                  color="inherit"
-                  onClick={handleSharedWithMe}
-                  aria-label="shared with me"
-                >
-                  <PeopleIcon />
-                </IconButton>
-              </Tooltip>
-              <Tooltip title="Share your planner">
-                <IconButton
-                  color="inherit"
-                  onClick={() => setShareDialogOpen(true)}
-                  aria-label="share"
-                >
-                  <ShareIcon />
-                </IconButton>
-              </Tooltip>
-              <Button
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              <IconButton
                 id="user-menu-button"
-                color="inherit"
                 onClick={handleClick}
                 aria-controls={open ? "user-menu" : undefined}
                 aria-haspopup="true"
                 aria-expanded={open ? "true" : undefined}
+                sx={{ p: 0.5 }}
               >
-                {displayName}
-              </Button>
+                <Avatar
+                  src={user.photoURL || undefined}
+                  alt={user.displayName || user.email || "User"}
+                  sx={{ width: 36, height: 36, bgcolor: "secondary.main" }}
+                >
+                  {getAvatarLetter()}
+                </Avatar>
+              </IconButton>
               <Menu
                 id="user-menu"
                 anchorEl={anchorEl}
@@ -94,7 +100,25 @@ export default function AppBar({ currentDate }: AppBarProps) {
                   "aria-labelledby": "user-menu-button",
                 }}
               >
-                <MenuItem onClick={handleLogout}>Logout</MenuItem>
+                <MenuItem onClick={handleSharedWithMe}>
+                  <ListItemIcon>
+                    <PeopleIcon fontSize="small" />
+                  </ListItemIcon>
+                  <ListItemText>Shared With Me</ListItemText>
+                </MenuItem>
+                <MenuItem onClick={handleSharePlanner}>
+                  <ListItemIcon>
+                    <ShareIcon fontSize="small" />
+                  </ListItemIcon>
+                  <ListItemText>Share your planner</ListItemText>
+                </MenuItem>
+                <Divider />
+                <MenuItem onClick={handleLogout}>
+                  <ListItemIcon>
+                    <LogoutIcon fontSize="small" />
+                  </ListItemIcon>
+                  <ListItemText>Logout</ListItemText>
+                </MenuItem>
               </Menu>
             </Box>
           )}
