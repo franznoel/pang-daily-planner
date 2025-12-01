@@ -55,7 +55,7 @@ export default function AppBar({ currentDate }: AppBarProps) {
     setShareDialogOpen(true);
   };
 
-  // Get the first letter of the first name for fallback avatar
+  // Get the first letter of the display name or email for fallback avatar
   const getAvatarLetter = () => {
     if (user?.displayName) {
       return user.displayName.charAt(0).toUpperCase();
