@@ -19,6 +19,7 @@ import {
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { PickersDay, PickersDayProps } from "@mui/x-date-pickers/PickersDay";
 import dayjs, { Dayjs } from "dayjs";
 import { useAuth } from "@/lib/AuthContext";
 import {
@@ -286,11 +287,16 @@ function SharedPlanViewContent() {
             <DatePicker
               label="Select Date"
               value={selectedDate}
-              onChange={(newDate) => setSelectedDate(newDate ?? dayjs())}
+              onChange={(newDate) => {
+                // Only allow selection if newDate is in datesWithPlansSet
+                if (newDate && datesWithPlansSet.has(newDate.format("YYYY-MM-DD"))) {
+                  setSelectedDate(newDate);
+                }
+              }}
               format="MMMM D, YYYY"
               slotProps={{ textField: { size: "small" } }}
               slots={{
-                day: (dayProps) => {
+                day: (dayProps: PickersDayProps) => {
                   const day = dayProps.day as Dayjs | undefined;
                   if (!day) {
                     return null;
@@ -298,49 +304,25 @@ function SharedPlanViewContent() {
                   const dateStr = day.format("YYYY-MM-DD");
                   const hasRecord = datesWithPlansSet.has(dateStr);
                   const { selected, ...other } = dayProps;
-                  if (hasRecord && !selected) {
-                    return (
-                      <Box
-                        component="button"
-                        {...other}
-                        sx={{
-                          border: "2px solid",
-                          borderColor: "primary.main",
-                          borderRadius: "50%",
-                          background: "none",
-                          cursor: "pointer",
-                          width: 36,
-                          height: 36,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          "&:hover": { backgroundColor: "action.hover" },
-                        }}
-                      >
-                        {day.date()}
-                      </Box>
-                    );
-                  }
+                  const shouldShowBorder = hasRecord && !selected;
+
                   return (
-                    <Box
-                      component="button"
+                    <PickersDay
                       {...other}
+                      day={day}
+                      selected={selected}
+                      disabled={!hasRecord}
                       sx={{
-                        background: selected ? "primary.main" : "none",
-                        color: selected ? "white" : "inherit",
+                        border: shouldShowBorder ? "2px solid" : "none",
+                        borderColor: shouldShowBorder ? "primary.main" : undefined,
                         borderRadius: "50%",
-                        border: "none",
-                        cursor: "pointer",
-                        width: 36,
-                        height: 36,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        "&:hover": { backgroundColor: "action.hover" },
+                        opacity: hasRecord ? 1 : 0.5,
+                        cursor: hasRecord ? "pointer" : "not-allowed",
+                        "&.Mui-disabled": {
+                          opacity: 0.5,
+                        },
                       }}
-                    >
-                      {day.date()}
-                    </Box>
+                    />
                   );
                 },
               }}
