@@ -18,14 +18,17 @@ import {
 import ShareIcon from "@mui/icons-material/Share";
 import PeopleIcon from "@mui/icons-material/People";
 import LogoutIcon from "@mui/icons-material/Logout";
+import HomeIcon from "@mui/icons-material/Home";
 import { useAuth } from "@/lib/AuthContext";
 import ShareDialog from "./ShareDialog";
 
 interface AppBarProps {
   currentDate?: string | null;
+  title?: string;
+  showHomeLink?: boolean;
 }
 
-export default function AppBar({ currentDate }: AppBarProps) {
+export default function AppBar({ currentDate, title = "Daily Planner", showHomeLink = false }: AppBarProps) {
   const { user, logout } = useAuth();
   const router = useRouter();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -70,8 +73,18 @@ export default function AppBar({ currentDate }: AppBarProps) {
     <>
       <MuiAppBar position="static">
         <Toolbar>
+          {showHomeLink && (
+            <IconButton
+              color="inherit"
+              onClick={() => router.push("/")}
+              aria-label="home"
+              sx={{ mr: 1 }}
+            >
+              <HomeIcon />
+            </IconButton>
+          )}
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Daily Planner
+            {title}
           </Typography>
           {user && (
             <Box sx={{ display: "flex", alignItems: "center" }}>

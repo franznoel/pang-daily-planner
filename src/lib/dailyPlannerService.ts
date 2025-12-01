@@ -178,6 +178,30 @@ export async function getDatesWithPlans(userId: string): Promise<string[]> {
 }
 
 /**
+ * User info document structure
+ */
+export interface UserInfoDocument {
+  email: string;
+  displayName: string;
+  createdAt?: string;
+}
+
+/**
+ * Get user info (email and displayName) from Firestore by userId
+ */
+export async function getUserInfo(userId: string): Promise<UserInfoDocument | null> {
+  const db = getFirestoreDb();
+  const userDocRef = doc(db, "user", userId);
+  const userDocSnap = await getDoc(userDocRef);
+
+  if (userDocSnap.exists()) {
+    return userDocSnap.data() as UserInfoDocument;
+  }
+
+  return null;
+}
+
+/**
  * Check if a user document exists and create/update it with user info
  */
 export async function ensureUserDocument(

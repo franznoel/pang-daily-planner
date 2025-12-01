@@ -14,40 +14,19 @@ import {
   ListItemText,
   ListItemAvatar,
   Avatar,
-  AppBar as MuiAppBar,
-  Toolbar,
-  Button,
-  Menu,
-  MenuItem,
-  IconButton,
 } from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
-import HomeIcon from "@mui/icons-material/Home";
 import { useAuth } from "@/lib/AuthContext";
 import { getSharedWithMe, SharedOwnerDocument } from "@/lib/dailyPlannerService";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import AppBar from "@/components/AppBar";
 
 function SharedWithMeContent() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const router = useRouter();
   const [sharedOwners, setSharedOwners] = useState<SharedOwnerDocument[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const open = Boolean(anchorEl);
-
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
-  const handleLogout = async () => {
-    handleClose();
-    await logout();
-  };
 
   const loadSharedOwners = useCallback(async () => {
     if (!user?.email) return;
@@ -73,50 +52,9 @@ function SharedWithMeContent() {
     router.push(`/view/${ownerId}`);
   };
 
-  const displayName = user?.displayName || user?.email || "User";
-
   return (
     <>
-      <MuiAppBar position="static">
-        <Toolbar>
-          <IconButton
-            color="inherit"
-            onClick={() => router.push("/")}
-            aria-label="home"
-            sx={{ mr: 1 }}
-          >
-            <HomeIcon />
-          </IconButton>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Shared With Me
-          </Typography>
-          {user && (
-            <Box>
-              <Button
-                id="user-menu-button"
-                color="inherit"
-                onClick={handleClick}
-                aria-controls={open ? "user-menu" : undefined}
-                aria-haspopup="true"
-                aria-expanded={open ? "true" : undefined}
-              >
-                {displayName}
-              </Button>
-              <Menu
-                id="user-menu"
-                anchorEl={anchorEl}
-                open={open}
-                onClose={handleClose}
-                MenuListProps={{
-                  "aria-labelledby": "user-menu-button",
-                }}
-              >
-                <MenuItem onClick={handleLogout}>Logout</MenuItem>
-              </Menu>
-            </Box>
-          )}
-        </Toolbar>
-      </MuiAppBar>
+      <AppBar title="Shared With Me" showHomeLink />
 
       <Card sx={{ p: 4, maxWidth: 800, margin: "auto", mt: 4, mb: 7 }}>
         <Typography variant="h4" fontWeight={600} gutterBottom>
