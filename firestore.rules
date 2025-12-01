@@ -26,17 +26,6 @@ service cloud.firestore {
         // Allow global viewers to read
         allow read: if request.auth != null && 
           exists(/databases/$(database)/documents/user/$(userId)/viewers/$(request.auth.token.email));
-        
-        // Allow date-specific viewers to read
-        allow read: if request.auth != null && 
-          exists(/databases/$(database)/documents/user/$(userId)/daily-plans/$(date)/viewers/$(request.auth.token.email));
-        
-        // Daily plan specific viewers subcollection
-        match /viewers/{viewerEmail} {
-          allow read, write: if request.auth != null && request.auth.uid == userId;
-          // Allow the viewer to read their own viewer document
-          allow read: if request.auth != null && request.auth.token.email == viewerEmail;
-        }
       }
     }
     

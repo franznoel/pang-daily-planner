@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React from "react";
 import { Grid, Divider, Card, CircularProgress, Box } from "@mui/material";
 
 import HeaderSection from "./HeaderSection";
@@ -18,20 +18,9 @@ import { useDailyPlanner } from "@/lib/useDailyPlanner";
 
 export type { HabitItem, PriorityItem, DailyPlannerState, ScheduleEvent };
 
-interface DailyPlannerPageProps {
-  onCurrentDateChange?: (date: string | null) => void;
-}
-
-const DailyPlannerPage: React.FC<DailyPlannerPageProps> = ({ onCurrentDateChange }) => {
+const DailyPlannerPage: React.FC = () => {
   const { state, loading, saving, datesWithPlans, updateField, changeDate } =
     useDailyPlanner();
-
-  // Notify parent about current date changes
-  useEffect(() => {
-    if (onCurrentDateChange) {
-      onCurrentDateChange(state.date?.format("YYYY-MM-DD") || null);
-    }
-  }, [state.date, onCurrentDateChange]);
 
   const updateListItem = (
     field: "gratefulFor" | "excitedAbout" | "peopleToSee" | "positiveThings",

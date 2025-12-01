@@ -23,12 +23,11 @@ import { useAuth } from "@/lib/AuthContext";
 import ShareDialog from "./ShareDialog";
 
 interface AppBarProps {
-  currentDate?: string | null;
   title?: string;
   showHomeLink?: boolean;
 }
 
-export default function AppBar({ currentDate, title = "Daily Planner", showHomeLink = false }: AppBarProps) {
+export default function AppBar({ title = "Daily Planner", showHomeLink = false }: AppBarProps) {
   const { user, logout } = useAuth();
   const router = useRouter();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -140,7 +139,6 @@ export default function AppBar({ currentDate, title = "Daily Planner", showHomeL
       <ShareDialog
         open={shareDialogOpen}
         onClose={() => setShareDialogOpen(false)}
-        currentDate={currentDate ?? null}
       />
     </>
   );
