@@ -175,7 +175,7 @@ function SharedPlanViewContent() {
     try {
       const userInfo = await getUserInfo(userId);
       if (userInfo) {
-        setOwnerDisplayName(userInfo.displayName || userInfo.email || userId);
+        setOwnerDisplayName(userInfo.displayName?.trim() || userInfo.email?.trim() || userId);
       } else {
         setOwnerDisplayName(userId);
       }

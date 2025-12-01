@@ -181,8 +181,8 @@ export async function getDatesWithPlans(userId: string): Promise<string[]> {
  * User info document structure
  */
 export interface UserInfoDocument {
-  email: string;
-  displayName: string;
+  email?: string;
+  displayName?: string;
   createdAt?: string;
 }
 
