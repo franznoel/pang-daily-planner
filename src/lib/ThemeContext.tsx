@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import React, { createContext, useContext, useState, useEffect, useRef, ReactNode } from "react";
 import { ThemeId, defaultThemeId } from "./themes";
 
 interface ThemeContextType {
@@ -14,11 +14,11 @@ const THEME_STORAGE_KEY = "pang-planner-theme";
 
 export function ThemeContextProvider({ children }: { children: ReactNode }) {
   const [themeId, setThemeIdState] = useState<ThemeId>(defaultThemeId);
-  const [mounted, setMounted] = useState(false);
+  const mountedRef = useRef(false);
 
   // Load theme from localStorage on mount
   useEffect(() => {
-    setMounted(true);
+    mountedRef.current = true;
     const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
     if (savedTheme) {
       // Validate that the saved theme is a valid ThemeId
@@ -44,7 +44,7 @@ export function ThemeContextProvider({ children }: { children: ReactNode }) {
   // Save theme to localStorage when it changes
   const setThemeId = (id: ThemeId) => {
     setThemeIdState(id);
-    if (mounted) {
+    if (mountedRef.current) {
       localStorage.setItem(THEME_STORAGE_KEY, id);
     }
   };
