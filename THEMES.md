@@ -1,5 +1,7 @@
 # Theme Selection Feature
 
+> **Note**: This feature has been rebased onto the latest main branch to incorporate recent project updates.
+
 The Pang Daily Planner now includes a comprehensive theme selection feature that allows users to personalize their experience with themes representing different generations and identities.
 
 ## How to Use
