@@ -28,13 +28,7 @@ export const adminApp = initializeFirebaseAdmin();
 export const adminDb = admin.firestore();
 export const adminAuth = admin.auth();
 
-// Set Firestore emulator if in development
-if (process.env.NODE_ENV !== "production") {
-  // Check if emulator host is set, otherwise use default
-  const firestoreEmulatorHost = process.env.FIRESTORE_EMULATOR_HOST || "localhost:8081";
-  
-  // Only set if not already set
-  if (!process.env.FIRESTORE_EMULATOR_HOST) {
-    process.env.FIRESTORE_EMULATOR_HOST = firestoreEmulatorHost;
-  }
+// Set Firestore emulator if in development and not already set
+if (process.env.NODE_ENV !== "production" && !process.env.FIRESTORE_EMULATOR_HOST) {
+  process.env.FIRESTORE_EMULATOR_HOST = "localhost:8081";
 }

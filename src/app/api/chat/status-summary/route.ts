@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 import { adminDb } from "@/lib/firebase-admin";
 import { DailyPlannerDocument } from "@/lib/dailyPlannerService";
+import { formatPlansForAI } from "@/lib/ai-utils";
 
 // Lazy initialize OpenAI client
 function getOpenAIClient() {
@@ -148,49 +149,4 @@ async function getUserInfo(userId: string): Promise<{ email?: string; displayNam
     console.error("Error fetching user info:", error);
     return null;
   }
-}
-
-// Helper function to format plans for AI
-function formatPlansForAI(plans: DailyPlannerDocument[]): string {
-  return plans
-    .map((plan, index) => {
-      const entries: string[] = [
-        `\n--- Entry ${index + 1}: ${plan.date} ---`,
-      ];
-
-      if (plan.energyLevel) entries.push(`Energy Level: ${plan.energyLevel}/10`);
-      if (plan.mood) entries.push(`Mood: ${plan.mood}`);
-      if (plan.intention) entries.push(`Intention: ${plan.intention}`);
-      if (plan.iAm) entries.push(`I Am: ${plan.iAm}`);
-
-      if (plan.gratefulFor?.length > 0) {
-        entries.push(`Grateful For: ${plan.gratefulFor.filter(Boolean).join(", ")}`);
-      }
-      if (plan.excitedAbout?.length > 0) {
-        entries.push(`Excited About: ${plan.excitedAbout.filter(Boolean).join(", ")}`);
-      }
-
-      // Habits
-      const completedMindHabits = plan.mindHabits?.filter((h) => h.text && h.checked).map((h) => h.text) || [];
-      const completedBodyHabits = plan.bodyHabits?.filter((h) => h.text && h.checked).map((h) => h.text) || [];
-      const completedSpiritHabits = plan.spiritHabits?.filter((h) => h.text && h.checked).map((h) => h.text) || [];
-
-      if (completedMindHabits.length > 0) entries.push(`Completed Mind Habits: ${completedMindHabits.join(", ")}`);
-      if (completedBodyHabits.length > 0) entries.push(`Completed Body Habits: ${completedBodyHabits.join(", ")}`);
-      if (completedSpiritHabits.length > 0) entries.push(`Completed Spirit Habits: ${completedSpiritHabits.join(", ")}`);
-
-      // Priorities
-      const completedTopPriorities = plan.topPriorities?.filter((p) => p.text && p.checked).map((p) => p.text) || [];
-      if (completedTopPriorities.length > 0) {
-        entries.push(`Completed Priorities: ${completedTopPriorities.join(", ")}`);
-      }
-
-      // Reflection
-      if (plan.whatInspiredMe) entries.push(`What Inspired Me: ${plan.whatInspiredMe}`);
-      if (plan.whatDidIDoWell) entries.push(`What I Did Well: ${plan.whatDidIDoWell}`);
-      if (plan.whatDidILearn) entries.push(`What I Learned: ${plan.whatDidILearn}`);
-
-      return entries.join("\n");
-    })
-    .join("\n");
 }
