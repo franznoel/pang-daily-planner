@@ -19,8 +19,10 @@ import ShareIcon from "@mui/icons-material/Share";
 import PeopleIcon from "@mui/icons-material/People";
 import LogoutIcon from "@mui/icons-material/Logout";
 import HomeIcon from "@mui/icons-material/Home";
+import PaletteIcon from "@mui/icons-material/Palette";
 import { useAuth } from "@/lib/AuthContext";
 import ShareDialog from "./ShareDialog";
+import ThemeDialog from "./ThemeDialog";
 
 interface AppBarProps {
   title?: string;
@@ -32,6 +34,7 @@ export default function AppBar({ title = "Daily Planner", showHomeLink = false }
   const router = useRouter();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const [themeDialogOpen, setThemeDialogOpen] = useState(false);
   const open = Boolean(anchorEl);
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -55,6 +58,11 @@ export default function AppBar({ title = "Daily Planner", showHomeLink = false }
   const handleSharePlanner = () => {
     handleClose();
     setShareDialogOpen(true);
+  };
+
+  const handleThemeSelect = () => {
+    handleClose();
+    setThemeDialogOpen(true);
   };
 
   // Get the first letter of the display name or email for fallback avatar
@@ -112,6 +120,13 @@ export default function AppBar({ title = "Daily Planner", showHomeLink = false }
                   "aria-labelledby": "user-menu-button",
                 }}
               >
+                <MenuItem onClick={handleThemeSelect}>
+                  <ListItemIcon>
+                    <PaletteIcon fontSize="small" />
+                  </ListItemIcon>
+                  <ListItemText>Select Theme</ListItemText>
+                </MenuItem>
+                <Divider />
                 <MenuItem onClick={handleSharedWithMe}>
                   <ListItemIcon>
                     <PeopleIcon fontSize="small" />
@@ -139,6 +154,10 @@ export default function AppBar({ title = "Daily Planner", showHomeLink = false }
       <ShareDialog
         open={shareDialogOpen}
         onClose={() => setShareDialogOpen(false)}
+      />
+      <ThemeDialog
+        open={themeDialogOpen}
+        onClose={() => setThemeDialogOpen(false)}
       />
     </>
   );
