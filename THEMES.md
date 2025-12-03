@@ -12,6 +12,23 @@ The Pang Daily Planner now includes a comprehensive theme selection feature that
 
 ## Available Themes
 
+### Classic Themes
+
+These are timeless themes including the original MUI theme and popular cultural aesthetics:
+
+#### **Default MUI**
+- **Description**: Original Material UI theme
+- **Colors**: Standard Material Design blue and purple
+- **Font**: System fonts (Roboto, SF Pro, etc.)
+- **Vibe**: Clean, professional, familiar
+- **Note**: This is the default theme
+
+#### **Matrix**
+- **Description**: Green-on-black hacker aesthetic
+- **Colors**: Bright green text on pure black background
+- **Font**: Monospace Courier New
+- **Vibe**: Cyberpunk, hacker culture, The Matrix movie-inspired
+
 ### Generation Themes
 
 These themes are inspired by different generational characteristics and aesthetics:
@@ -33,7 +50,6 @@ These themes are inspired by different generational characteristics and aestheti
 - **Colors**: Clean blues and cyans
 - **Font**: Contemporary Roboto
 - **Vibe**: Professional, digital-first, minimalist
-- **Note**: This is the default theme
 
 #### **Viral Energy** (Generation Z)
 - **Description**: Vibrant and social
