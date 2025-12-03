@@ -1,7 +1,7 @@
 "use client";
 
-import { getFunctions, httpsCallable } from "firebase/functions";
-import { getFirebaseApp } from "./firebase";
+import { httpsCallable } from "firebase/functions";
+import { getFirebaseFunctions } from "./firebase";
 
 export interface ChatMessage {
   role: "user" | "assistant" | "system";
@@ -23,8 +23,7 @@ export interface ChatAboutUserStatusResponse {
  * Get an initial summary of a user's status based on their last 30 daily planner entries
  */
 export async function getUserStatusSummary(userId: string): Promise<string> {
-  const app = getFirebaseApp();
-  const functions = getFunctions(app);
+  const functions = getFirebaseFunctions();
   
   const getUserStatusSummaryFn = httpsCallable<
     { userId: string },
@@ -49,8 +48,7 @@ export async function chatAboutUserStatus(
   userId: string,
   messages: ChatMessage[]
 ): Promise<string> {
-  const app = getFirebaseApp();
-  const functions = getFunctions(app);
+  const functions = getFirebaseFunctions();
   
   const chatAboutUserStatusFn = httpsCallable<
     { userId: string; messages: ChatMessage[] },

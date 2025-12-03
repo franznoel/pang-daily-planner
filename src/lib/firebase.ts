@@ -1,6 +1,7 @@
 import { initializeApp, getApps, FirebaseApp } from "firebase/app";
 import { getFirestore, connectFirestoreEmulator, Firestore } from "firebase/firestore";
 import { getAuth, connectAuthEmulator, GoogleAuthProvider, Auth } from "firebase/auth";
+import { getFunctions, connectFunctionsEmulator, Functions } from "firebase/functions";
 
 const isDevelopment = process.env.NODE_ENV !== "production";
 
@@ -30,10 +31,12 @@ const firebaseConfig = {
 // Track emulator connection status
 let firestoreEmulatorConnected = false;
 let authEmulatorConnected = false;
+let functionsEmulatorConnected = false;
 
 let app: FirebaseApp | undefined;
 let db: Firestore | undefined;
 let auth: Auth | undefined;
+let functions: Functions | undefined;
 let googleProvider: GoogleAuthProvider | undefined;
 
 function getFirebaseApp(): FirebaseApp {
@@ -67,6 +70,18 @@ function getFirebaseAuth(): Auth {
   return auth;
 }
 
+function getFirebaseFunctions(): Functions {
+  if (!functions) {
+    functions = getFunctions(getFirebaseApp());
+    // Connect to emulator in development
+    if (typeof window !== "undefined" && isDevelopment && !functionsEmulatorConnected) {
+      connectFunctionsEmulator(functions, "localhost", 5001);
+      functionsEmulatorConnected = true;
+    }
+  }
+  return functions;
+}
+
 function getGoogleProvider(): GoogleAuthProvider {
   if (!googleProvider) {
     googleProvider = new GoogleAuthProvider();
@@ -74,4 +89,4 @@ function getGoogleProvider(): GoogleAuthProvider {
   return googleProvider;
 }
 
-export { getFirebaseApp, getFirestoreDb, getFirebaseAuth, getGoogleProvider };
+export { getFirebaseApp, getFirestoreDb, getFirebaseAuth, getFirebaseFunctions, getGoogleProvider };
