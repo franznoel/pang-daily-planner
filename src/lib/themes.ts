@@ -3,6 +3,7 @@
 import { createTheme, Theme } from "@mui/material/styles";
 
 export type ThemeId = 
+  | "default-mui"
   | "groovy-vibes"
   | "neon-dreams"
   | "digital-dawn"
@@ -11,12 +12,13 @@ export type ThemeId =
   | "rainbow-pride"
   | "bold-classic"
   | "sister-circle"
-  | "brotherhood";
+  | "brotherhood"
+  | "matrix";
 
 export interface ThemeConfig {
   id: ThemeId;
   name: string;
-  category: "Generation" | "Identity";
+  category: "Generation" | "Identity" | "Classic";
   description: string;
   theme: Theme;
 }
@@ -205,7 +207,61 @@ const brotherhoodTheme = createTheme({
   },
 });
 
+// Default MUI - Original Material UI theme
+const defaultMuiTheme = createTheme({
+  palette: {
+    mode: "light",
+    primary: {
+      main: "#1976d2",
+    },
+    secondary: {
+      main: "#9c27b0",
+    },
+  },
+  typography: {
+    fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+  },
+});
+
+// Matrix - Green-on-black hacker aesthetic
+const matrixTheme = createTheme({
+  palette: {
+    mode: "dark",
+    primary: {
+      main: "#00FF00", // Matrix green
+    },
+    secondary: {
+      main: "#00CC00", // Darker green
+    },
+    background: {
+      default: "#000000", // Black
+      paper: "#0D0D0D", // Near black
+    },
+    text: {
+      primary: "#00FF00", // Matrix green
+      secondary: "#00CC00", // Darker green
+    },
+  },
+  typography: {
+    fontFamily: "'Courier New', 'Courier', monospace",
+  },
+});
+
 export const themes: ThemeConfig[] = [
+  {
+    id: "default-mui",
+    name: "Default MUI",
+    category: "Classic",
+    description: "Original Material UI theme",
+    theme: defaultMuiTheme,
+  },
+  {
+    id: "matrix",
+    name: "Matrix",
+    category: "Classic",
+    description: "Green-on-black hacker aesthetic",
+    theme: matrixTheme,
+  },
   {
     id: "groovy-vibes",
     name: "Groovy Vibes",
@@ -273,7 +329,7 @@ export const themes: ThemeConfig[] = [
 
 export const getThemeById = (id: ThemeId): ThemeConfig => {
   const theme = themes.find((t) => t.id === id);
-  return theme || themes[2]; // Default to Digital Dawn (Millennials)
+  return theme || themes[0]; // Default to Default MUI
 };
 
-export const defaultThemeId: ThemeId = "digital-dawn";
+export const defaultThemeId: ThemeId = "default-mui";

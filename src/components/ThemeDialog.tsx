@@ -33,6 +33,7 @@ export default function ThemeDialog({ open, onClose }: ThemeDialogProps) {
   };
 
   // Group themes by category
+  const classicThemes = themes.filter((t) => t.category === "Classic");
   const generationThemes = themes.filter((t) => t.category === "Generation");
   const identityThemes = themes.filter((t) => t.category === "Identity");
 
@@ -45,6 +46,34 @@ export default function ThemeDialog({ open, onClose }: ThemeDialogProps) {
         </Box>
       </DialogTitle>
       <DialogContent>
+        <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
+          Classic Themes
+        </Typography>
+        <List>
+          {classicThemes.map((theme) => (
+            <ListItem key={theme.id} disablePadding>
+              <ListItemButton
+                onClick={() => handleThemeSelect(theme.id)}
+                selected={themeId === theme.id}
+              >
+                <ListItemIcon>
+                  {themeId === theme.id ? (
+                    <CheckCircleIcon color="primary" />
+                  ) : (
+                    <PaletteIcon />
+                  )}
+                </ListItemIcon>
+                <ListItemText
+                  primary={theme.name}
+                  secondary={theme.description}
+                />
+              </ListItemButton>
+            </ListItem>
+          ))}
+        </List>
+
+        <Divider sx={{ my: 2 }} />
+
         <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
           Generation Themes
         </Typography>
