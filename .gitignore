@@ -51,3 +51,6 @@ firebase-debug.log
 emulator-data/
 firestore-debug.log
 ui-debug.log
+
+# functions build output
+/functions/lib/
