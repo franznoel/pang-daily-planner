@@ -20,22 +20,16 @@ The functions require an OpenAI API key to be configured as an environment varia
 Create a `.env` file in the `functions` directory:
 
 ```bash
-OPENAI_KEY=your_openai_api_key_here
+OPENAI_API_KEY=your_openai_api_key_here
 ```
 
 #### For Production Deployment
 
-Set the environment variable using Firebase CLI:
+The API key is provided through the GitHub Actions deployment workflow as a secret. Configure it in your GitHub repository:
 
-```bash
-firebase functions:config:set openai.key="your_openai_api_key_here"
-```
-
-Then deploy the configuration:
-
-```bash
-firebase deploy --only functions:config
-```
+1. Go to Settings > Secrets and variables > Actions
+2. Add a new secret named `OPENAI_API_KEY` with your OpenAI API key value
+3. The deployment workflow will automatically pass this to Firebase Functions
 
 ### 3. Build the Functions
 
