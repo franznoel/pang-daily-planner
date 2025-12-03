@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, useRef, ReactNode } from "react";
+import React, { createContext, useContext, useState, ReactNode } from "react";
 import { ThemeId, defaultThemeId } from "./themes";
 
 interface ThemeContextType {
@@ -12,39 +12,42 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 const THEME_STORAGE_KEY = "pang-planner-theme";
 
-export function ThemeContextProvider({ children }: { children: ReactNode }) {
-  const [themeId, setThemeIdState] = useState<ThemeId>(defaultThemeId);
-  const mountedRef = useRef(false);
+// Valid theme IDs for validation
+const validThemes: ThemeId[] = [
+  "default-mui",
+  "matrix",
+  "groovy-vibes",
+  "neon-dreams",
+  "digital-dawn",
+  "viral-energy",
+  "future-fusion",
+  "rainbow-pride",
+  "bold-classic",
+  "sister-circle",
+  "brotherhood",
+];
 
-  // Load theme from localStorage on mount
-  useEffect(() => {
-    mountedRef.current = true;
-    const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
-    if (savedTheme) {
-      // Validate that the saved theme is a valid ThemeId
-      const validThemes: ThemeId[] = [
-        "default-mui",
-        "matrix",
-        "groovy-vibes",
-        "neon-dreams",
-        "digital-dawn",
-        "viral-energy",
-        "future-fusion",
-        "rainbow-pride",
-        "bold-classic",
-        "sister-circle",
-        "brotherhood",
-      ];
-      if (validThemes.includes(savedTheme as ThemeId)) {
-        setThemeIdState(savedTheme as ThemeId);
-      }
-    }
-  }, []);
+// Helper function to get initial theme from localStorage
+function getInitialTheme(): ThemeId {
+  if (typeof window === "undefined") {
+    return defaultThemeId;
+  }
+  
+  const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+  if (savedTheme && validThemes.includes(savedTheme as ThemeId)) {
+    return savedTheme as ThemeId;
+  }
+  
+  return defaultThemeId;
+}
+
+export function ThemeContextProvider({ children }: { children: ReactNode }) {
+  const [themeId, setThemeIdState] = useState<ThemeId>(getInitialTheme);
 
   // Save theme to localStorage when it changes
   const setThemeId = (id: ThemeId) => {
     setThemeIdState(id);
-    if (mountedRef.current) {
+    if (typeof window !== "undefined") {
       localStorage.setItem(THEME_STORAGE_KEY, id);
     }
   };
