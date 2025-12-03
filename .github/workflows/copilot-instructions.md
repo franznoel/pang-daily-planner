@@ -8,14 +8,14 @@ The project uses **Next.js, TypeScript, GraphQL, Firebase, React, and ESLint wit
 ## 🧩 GENERAL PROJECT RULES
 
 1. **Always write TypeScript**, not JavaScript.
-2. **Never hardcode secrets** (use environment variables or Firebase config).
-3. For any backend logic that interacts with external APIs (OpenAI, Stripe, etc.),  
-   **use Firebase Cloud Functions** — not client-side code.
+2. **Never hardcode secrets** (use environment variables, not Firebase config).
+3. For any backend logic that interacts with external APIs (OpenAI, Stripe, etc.),
+   **use Next.js server-only API routes** under `app/api/*` or Next.js Server Actions — not client-side code. Do NOT create a separate Firebase Functions project/directory inside this repo; all server-side "functions" belong inside the Next.js app.
 4. When generating new files:
    - Place React components in `src/components/`
    - Place hooks in `src/hooks/`
    - Place GraphQL schemas/resolvers in `src/graphql/`
-   - Place Firebase integration code in `src/lib/firebase/`
+   - Place Firebase integration code in `src/lib/firebase/` (see notes below for admin vs client SDK)
 5. When modifying existing code, preserve:
    - Existing style patterns  
    - File structure  
@@ -23,6 +23,8 @@ The project uses **Next.js, TypeScript, GraphQL, Firebase, React, and ESLint wit
 6. When creating new server routes:
    - Prefer **Next.js App Router** (`app/api/.../route.ts`)
    - Use **POST** for any API involving data writes
+   - Keep routes small and single-purpose (one responsibility per route file)
+   - Place main GraphQL endpoint at `src/app/api/graphql.ts` (if applicable)
 
 ---
 
@@ -33,7 +35,7 @@ The project uses **Next.js, TypeScript, GraphQL, Firebase, React, and ESLint wit
 - Avoid unused variables
 - Avoid synchronous server/client mismatches
 - Use server components when possible
-- Avoid blocking rendering (expensive operations → server components or Firebase functions)
+- Avoid blocking rendering (expensive operations → server components or `app/api/*` routes)
 - Use `use client` only when truly needed
 
 ### Component Guidelines
@@ -64,7 +66,8 @@ When touching GraphQL code:
 - All resolvers must use correct `Context` typing
 - Never return nullable fields unless the schema specifies `nullable`
 - Avoid circular imports
-- Mutations that modify Firestore must run server-side (Firebase Functions or Next.js Server Actions)
+- Mutations that modify Firestore must run server-side (Next.js server-only code under `app/api/*` or Next.js Server Actions). Do not run Admin-level mutations in client components.
+- Ensure the repository's primary GraphQL library is used for the main GraphQL endpoint located at `src/app/api/graphql.ts`. Do not introduce a second GraphQL server implementation in this repo. If the project already uses a specific GraphQL server library (Apollo Server, GraphQL Yoga, Mercurius, or the `graphql` reference implementation), reuse that same library and its canonical adapters when implementing `src/app/api/graphql.ts`. Prefer using the existing patterns found elsewhere in the repository (imports, helpers, and server adapters).
 
 ---
 
@@ -72,18 +75,26 @@ When touching GraphQL code:
 
 ### For Firebase Admin:
 - Only used in:
-  - Firebase Cloud Functions
-  - Next.js **server-only** code (`app/api/*`)
+  - Next.js **server-only** code (`app/api/*`) or Server Actions
+- Do not create or rely on a separate Firebase Functions project/directory in this repository. All backend logic that requires the Admin SDK should be placed in `app/api/...` route handlers (or in server-only modules imported by those handlers).
 
 ### For Firebase Client SDK:
 - Only used in:
   - React client components
   - `src/lib/firebase/client.ts`
 
+### File layout recommendations
+- `src/lib/firebase/client.ts` — initializes client SDK for browser usage
+- `src/lib/firebase/admin.ts` — initializes Admin SDK in a server-only context (import only from `app/api/*` or server components)
+- Avoid committing service account JSON; instead use environment variables or Firebase project config injected at deploy time.
+
 ### Absolutely forbidden:
 - Using Admin SDK in the browser  
 - Calling OpenAI API from client components  
 - Committing Firebase service account JSON  
+
+Notes:
+- If you need background jobs, long-running tasks, or scheduled tasks that cannot run in serverless route handlers, discuss an external service (Cloud Run/Cron or a managed Cloud Function outside this repo). But the default for this project is to keep everything inside `app/api/*`.
 
 ---
 
@@ -159,7 +170,7 @@ The Copilot Agent must:
 3. Run automated linting and formatting:
 
 ```
-npm run lint –fix
+npm run lint -- --fix
 npm run format
 ```
 
@@ -184,5 +195,5 @@ When instructions from the user conflict with these rules:
 **Write clean, typed, Next.js-compliant, Web-Vitals-friendly TypeScript code.  
 Respect ESLint rules.  
 Never expose secrets.  
-Always prefer server-side for sensitive logic.  
-Always keep code modular and readable.**  
+Always prefer server-side for sensitive logic — and in this repository, server-side logic lives in Next.js server-only API routes (`app/api/*`) or Server Actions.  
+Always keep code modular and readable.**
