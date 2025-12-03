@@ -31,13 +31,20 @@ The Pang Daily Planner now allows users to personalize their experience with 9 u
 
 ## Theme Descriptions
 
+### Classic Themes
+
+| Theme Name | Style | Colors | Best For |
+|------------|-------|--------|----------|
+| **Default MUI** | Clean & Professional | Material blue, purple | Default theme, familiar MUI experience |
+| **Matrix** | Cyberpunk & Dark | Green on black | Hacker aesthetic, Matrix movie fans |
+
 ### Generation Themes
 
 | Theme Name | Generation | Style | Colors | Best For |
 |------------|-----------|-------|--------|----------|
 | **Groovy Vibes** | Baby Boomers | Warm & Nostalgic | Earthy browns, oranges | Those who appreciate classic, comfortable aesthetics |
 | **Neon Dreams** | Generation X | Bold & Electric | Neon pink, turquoise on black | Fans of 80s/90s cyberpunk style |
-| **Digital Dawn** | Millennials | Modern & Clean | Blues and cyans | Default theme, tech-savvy professionals |
+| **Digital Dawn** | Millennials | Modern & Clean | Blues and cyans | Tech-savvy professionals |
 | **Viral Energy** | Generation Z | Vibrant & Social | Hot pink, purple | Social media enthusiasts |
 | **Future Fusion** | Generation Alpha | Futuristic & Dark | Cyan, magenta on dark | Those who love cutting-edge aesthetics |
 
@@ -71,10 +78,10 @@ The Pang Daily Planner now allows users to personalize their experience with 9 u
 ## Frequently Asked Questions
 
 **Q: How do I reset to the default theme?**
-A: Select "Digital Dawn" from the theme menu. This is the default Millennials theme.
+A: Select "Default MUI" from the theme menu. This is the original Material UI theme.
 
 **Q: Can I create my own custom theme?**
-A: Currently, you can choose from the 9 pre-designed themes. Custom theme creation may be added in the future.
+A: Currently, you can choose from the 11 pre-designed themes. Custom theme creation may be added in the future.
 
 **Q: Will my theme choice be lost if I clear my browser data?**
 A: Yes, clearing localStorage will reset your theme to the default. Simply select your preferred theme again.
