@@ -23,6 +23,8 @@ export function ThemeContextProvider({ children }: { children: ReactNode }) {
     if (savedTheme) {
       // Validate that the saved theme is a valid ThemeId
       const validThemes: ThemeId[] = [
+        "default-mui",
+        "matrix",
         "groovy-vibes",
         "neon-dreams",
         "digital-dawn",
