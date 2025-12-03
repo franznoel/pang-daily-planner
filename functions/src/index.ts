@@ -1,16 +1,15 @@
-import * as functions from "firebase-functions";
+import {https} from "firebase-functions/v2";
 import * as admin from "firebase-admin";
 import OpenAI from "openai";
 
 admin.initializeApp();
 
-// Initialize OpenAI with API key from Firebase config
+// Initialize OpenAI with API key from environment variable
 const getOpenAIClient = () => {
-  const config = functions.config();
-  const apiKey = config.openai?.key;
+  const apiKey = process.env.OPENAI_KEY;
   
   if (!apiKey) {
-    throw new Error("OpenAI API key not configured. Run: firebase functions:config:set openai.key=\"YOUR_API_KEY\"");
+    throw new Error("OpenAI API key not configured. Set OPENAI_KEY environment variable.");
   }
   
   return new OpenAI({
@@ -119,27 +118,27 @@ Positive Things: ${entry.positiveThings.filter(Boolean).join(", ")}
  * Get user status summary from ChatGPT
  * This endpoint fetches the last 30 entries and generates an initial summary
  */
-export const getUserStatusSummary = functions.https.onCall(async (data, context) => {
+export const getUserStatusSummary = https.onCall(async (request) => {
   // Ensure user is authenticated
-  if (!context.auth) {
-    throw new functions.https.HttpsError(
+  if (!request.auth) {
+    throw new https.HttpsError(
       "unauthenticated",
       "User must be authenticated to access this function"
     );
   }
   
-  const { userId } = data;
-  const viewerEmail = context.auth.token.email;
+  const { userId } = request.data;
+  const viewerEmail = request.auth.token.email;
   
   if (!userId) {
-    throw new functions.https.HttpsError(
+    throw new https.HttpsError(
       "invalid-argument",
       "userId is required"
     );
   }
   
   if (!viewerEmail) {
-    throw new functions.https.HttpsError(
+    throw new https.HttpsError(
       "unauthenticated",
       "User email is required"
     );
@@ -148,7 +147,7 @@ export const getUserStatusSummary = functions.https.onCall(async (data, context)
   // Check if user has viewer access
   const hasAccess = await hasViewerAccess(userId, viewerEmail);
   if (!hasAccess) {
-    throw new functions.https.HttpsError(
+    throw new https.HttpsError(
       "permission-denied",
       "You do not have permission to view this user's status"
     );
@@ -159,7 +158,7 @@ export const getUserStatusSummary = functions.https.onCall(async (data, context)
     const entries = await getLastNEntries(userId, 30);
     
     if (entries.length === 0) {
-      throw new functions.https.HttpsError(
+      throw new https.HttpsError(
         "not-found",
         "No daily planner entries found for this user"
       );
@@ -196,10 +195,10 @@ export const getUserStatusSummary = functions.https.onCall(async (data, context)
     };
   } catch (error) {
     console.error("Error generating user status summary:", error);
-    if (error instanceof functions.https.HttpsError) {
+    if (error instanceof https.HttpsError) {
       throw error;
     }
-    throw new functions.https.HttpsError(
+    throw new https.HttpsError(
       "internal",
       "Failed to generate status summary"
     );
@@ -210,34 +209,34 @@ export const getUserStatusSummary = functions.https.onCall(async (data, context)
  * Chat with ChatGPT about user status
  * Allows follow-up questions and interactions
  */
-export const chatAboutUserStatus = functions.https.onCall(async (data, context) => {
+export const chatAboutUserStatus = https.onCall(async (request) => {
   // Ensure user is authenticated
-  if (!context.auth) {
-    throw new functions.https.HttpsError(
+  if (!request.auth) {
+    throw new https.HttpsError(
       "unauthenticated",
       "User must be authenticated to access this function"
     );
   }
   
-  const { userId, messages } = data;
-  const viewerEmail = context.auth.token.email;
+  const { userId, messages } = request.data;
+  const viewerEmail = request.auth.token.email;
   
   if (!userId) {
-    throw new functions.https.HttpsError(
+    throw new https.HttpsError(
       "invalid-argument",
       "userId is required"
     );
   }
   
   if (!messages || !Array.isArray(messages)) {
-    throw new functions.https.HttpsError(
+    throw new https.HttpsError(
       "invalid-argument",
       "messages array is required"
     );
   }
   
   if (!viewerEmail) {
-    throw new functions.https.HttpsError(
+    throw new https.HttpsError(
       "unauthenticated",
       "User email is required"
     );
@@ -246,7 +245,7 @@ export const chatAboutUserStatus = functions.https.onCall(async (data, context) 
   // Check if user has viewer access
   const hasAccess = await hasViewerAccess(userId, viewerEmail);
   if (!hasAccess) {
-    throw new functions.https.HttpsError(
+    throw new https.HttpsError(
       "permission-denied",
       "You do not have permission to view this user's status"
     );
@@ -257,7 +256,7 @@ export const chatAboutUserStatus = functions.https.onCall(async (data, context) 
     const entries = await getLastNEntries(userId, 30);
     
     if (entries.length === 0) {
-      throw new functions.https.HttpsError(
+      throw new https.HttpsError(
         "not-found",
         "No daily planner entries found for this user"
       );
@@ -290,10 +289,10 @@ export const chatAboutUserStatus = functions.https.onCall(async (data, context) 
     };
   } catch (error) {
     console.error("Error chatting about user status:", error);
-    if (error instanceof functions.https.HttpsError) {
+    if (error instanceof https.HttpsError) {
       throw error;
     }
-    throw new functions.https.HttpsError(
+    throw new https.HttpsError(
       "internal",
       "Failed to generate chat response"
     );

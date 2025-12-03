@@ -67,15 +67,33 @@ src/
 - **Apollo Client**: Ready for GraphQL integration
 - **Storybook**: Component documentation with MUI theme support
 - **TypeScript**: Full type safety throughout the application
+- **ChatGPT Integration**: AI-powered user status summaries and chat functionality
+  - View AI-generated insights about user habits, mood patterns, and productivity
+  - Interactive chat to ask questions about user status
+  - Based on analysis of the last 30 daily planner entries
 
 ## Firebase Deployment
 
-This project is configured for Firebase Hosting with web framework support:
+This project is configured for Firebase Hosting and Functions:
 
 1. Install Firebase CLI: `npm install -g firebase-tools`
 2. Login to Firebase: `firebase login`
 3. Update `.firebaserc` with your project ID
 4. Deploy: `npm run deploy`
+
+### Firebase Functions Setup
+
+The ChatGPT integration requires Firebase Functions with an OpenAI API key:
+
+1. Navigate to the functions directory: `cd functions`
+2. Install dependencies: `npm install`
+3. Configure the OpenAI API key:
+   - For local development: Create a `.env` file with `OPENAI_KEY=your_api_key`
+   - For production: Run `firebase functions:config:set openai.key="your_api_key"`
+4. Build the functions: `npm run build`
+5. Deploy: `firebase deploy --only functions`
+
+See [functions/README.md](functions/README.md) for more details.
 
 ## Environment Variables
 
