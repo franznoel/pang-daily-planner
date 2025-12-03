@@ -21,7 +21,21 @@ export function ThemeContextProvider({ children }: { children: ReactNode }) {
     setMounted(true);
     const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
     if (savedTheme) {
-      setThemeIdState(savedTheme as ThemeId);
+      // Validate that the saved theme is a valid ThemeId
+      const validThemes: ThemeId[] = [
+        "groovy-vibes",
+        "neon-dreams",
+        "digital-dawn",
+        "viral-energy",
+        "future-fusion",
+        "rainbow-pride",
+        "bold-classic",
+        "sister-circle",
+        "brotherhood",
+      ];
+      if (validThemes.includes(savedTheme as ThemeId)) {
+        setThemeIdState(savedTheme as ThemeId);
+      }
     }
   }, []);
 
