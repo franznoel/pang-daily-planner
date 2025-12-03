@@ -88,10 +88,10 @@ The ChatGPT integration requires Firebase Functions with an OpenAI API key:
 1. Navigate to the functions directory: `cd functions`
 2. Install dependencies: `npm install`
 3. Configure the OpenAI API key:
-   - For local development: Create a `.env` file with `OPENAI_KEY=your_api_key`
-   - For production: Run `firebase functions:config:set openai.key="your_api_key"`
+   - For local development: Create a `.env` file with `OPENAI_API_KEY=your_api_key`
+   - For production: Add `OPENAI_API_KEY` as a GitHub secret in your repository settings
 4. Build the functions: `npm run build`
-5. Deploy: `firebase deploy --only functions`
+5. Deploy: The GitHub Actions workflow will automatically deploy functions with the API key
 
 See [functions/README.md](functions/README.md) for more details.
 
