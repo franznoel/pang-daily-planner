@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import {
   Box,
   Card,
@@ -10,7 +10,9 @@ import {
   Alert,
   Divider,
   Grid,
+  Button,
 } from "@mui/material";
+import ChatIcon from "@mui/icons-material/Chat";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -161,6 +163,7 @@ function ReadOnlySchedule({
 
 function SharedPlanViewContent() {
   const params = useParams();
+  const router = useRouter();
   const userId = params.userId as string;
   const { user } = useAuth();
 
@@ -244,9 +247,18 @@ function SharedPlanViewContent() {
 
       <Card sx={{ p: 4, maxWidth: 1200, margin: "auto", mt: 4, mb: 7 }}>
         <Box sx={{ mb: 3 }}>
-          <Typography variant="h4" fontWeight={600} gutterBottom>
-            Viewing Shared Plan
-          </Typography>
+          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1 }}>
+            <Typography variant="h4" fontWeight={600}>
+              Viewing Shared Plan
+            </Typography>
+            <Button
+              variant="contained"
+              startIcon={<ChatIcon />}
+              onClick={() => router.push(`/view/${userId}/status`)}
+            >
+              Chat About Status
+            </Button>
+          </Box>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
             You are viewing plans shared by: {ownerDisplayName || userId}
           </Typography>
