@@ -1,7 +1,9 @@
 "use client";
 
 import React from "react";
-import { Box, TextField, Typography, Stack, CircularProgress, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent } from "@mui/material";
+import { useRouter } from "next/navigation";
+import { Box, TextField, Typography, Stack, CircularProgress, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent, Button } from "@mui/material";
+import ChatIcon from "@mui/icons-material/Chat";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -59,6 +61,8 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
   onEnergyLevelChange,
   onMoodChange,
 }) => {
+  const router = useRouter();
+  
   // Convert array to Set for O(1) lookups in DatePicker
   const datesWithPlansSet = React.useMemo(
     () => new Set(datesWithPlans),
@@ -71,18 +75,28 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
 
   return (
     <Box>
-      <Stack direction="row" alignItems="center" spacing={2}>
-        <Typography variant="h4" fontWeight={600} gutterBottom>
-          Daily Planner
-        </Typography>
-        {(loading || saving) && (
-          <CircularProgress size={20} sx={{ mb: 1 }} />
-        )}
-        {saving && (
-          <Typography variant="caption" color="text.secondary" sx={{ mb: 1 }}>
-            Saving...
+      <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={2}>
+        <Stack direction="row" alignItems="center" spacing={2}>
+          <Typography variant="h4" fontWeight={600} gutterBottom>
+            Daily Planner
           </Typography>
-        )}
+          {(loading || saving) && (
+            <CircularProgress size={20} sx={{ mb: 1 }} />
+          )}
+          {saving && (
+            <Typography variant="caption" color="text.secondary" sx={{ mb: 1 }}>
+              Saving...
+            </Typography>
+          )}
+        </Stack>
+        <Button
+          variant="contained"
+          startIcon={<ChatIcon />}
+          onClick={() => router.push("/status")}
+          size="small"
+        >
+          Chat with AI
+        </Button>
       </Stack>
 
       <Stack direction="row" spacing={3} alignItems="flex-start">
