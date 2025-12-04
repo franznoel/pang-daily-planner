@@ -13,7 +13,10 @@
     "deploy": "firebase deploy --only hosting",
     "emulators": "firebase emulators:start",
     "emulators:export": "firebase emulators:export ./emulator-data",
-    "emulators:import": "firebase emulators:start --import=./emulator-data"
+    "emulators:import": "firebase emulators:start --import=./emulator-data",
+    "seed:generate": "node seed-data/generate-seed-data.js",
+    "seed:import": "node seed-data/import-seed-data.js",
+    "emulators:seed": "npm run seed:generate && firebase emulators:start"
   },
   "dependencies": {
     "@apollo/client": "^4.0.9",
