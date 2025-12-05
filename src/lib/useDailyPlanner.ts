@@ -102,34 +102,34 @@ export function useDailyPlanner(): UseDailyPlannerReturn {
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isInitialLoad = useRef(true);
 
-  // Load dates with plans
-  const loadDatesWithPlans = useCallback(async () => {
-    if (!user) return;
-    try {
-      const dates = await getDatesWithPlans(user.uid);
-      setDatesWithPlans(dates);
-    } catch (error) {
-      console.error("Error loading dates with plans:", error);
-    }
-  }, [user]);
+  const lastSavedRef = useRef<DailyPlannerState | null>(null);
 
   // Save state to Firestore with debounce
   const saveState = useCallback(
     async (stateToSave: DailyPlannerState) => {
+      if (JSON.stringify(lastSavedRef.current) === JSON.stringify(stateToSave)) {
+        return;
+      }
+
       if (!user || !stateToSave.date) return;
 
       setSaving(true);
       try {
         await saveDailyPlan(user.uid, stateToSave);
         // Update dates with plans after saving
-        await loadDatesWithPlans();
+        setDatesWithPlans((prev) => {
+          const currentDate = stateToSave.date?.format("YYYY-MM-DD");
+          return currentDate && !prev.includes(currentDate)
+            ? [...prev, currentDate]
+            : prev;
+        });
       } catch (error) {
         console.error("Error saving daily plan:", error);
       } finally {
         setSaving(false);
       }
     },
-    [user, loadDatesWithPlans]
+    [user]
   );
 
   // Debounced save
