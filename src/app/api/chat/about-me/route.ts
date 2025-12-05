@@ -25,6 +25,12 @@ export async function POST(request: NextRequest) {
     // Get last 90 daily plans
     const plans = await getLast90Plans(userId);
 
+    // Log plans temporarily if not in production
+    if (process.env.NODE_ENV !== "production") {
+      console.log(`[about-me] Fetched ${plans.length} plans for user ${userId}`);
+      console.log("[about-me] Plans data:", JSON.stringify(plans, null, 2));
+    }
+
     if (plans.length === 0) {
       return NextResponse.json(
         { error: "No daily plans found" },
@@ -38,6 +44,12 @@ export async function POST(request: NextRequest) {
 
     // Format plans data for ChatGPT context
     const plansData = formatPlansForAI(plans);
+
+    // Log formatted plans data if not in production
+    if (process.env.NODE_ENV !== "production") {
+      console.log("[about-me] Formatted plans for AI:");
+      console.log(plansData);
+    }
 
     // Build conversation messages
     const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [

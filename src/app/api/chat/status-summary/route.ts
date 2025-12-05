@@ -34,6 +34,12 @@ export async function POST(request: NextRequest) {
     // Get last 30 daily plans
     const plans = await getLast30Plans(userId);
 
+    // Log plans temporarily if not in production
+    if (process.env.NODE_ENV !== "production") {
+      console.log(`[status-summary] Fetched ${plans.length} plans for user ${userId}`);
+      console.log("[status-summary] Plans data:", JSON.stringify(plans, null, 2));
+    }
+
     if (plans.length === 0) {
       return NextResponse.json(
         { error: "No daily plans found for this user" },
@@ -47,6 +53,12 @@ export async function POST(request: NextRequest) {
 
     // Format plans data for ChatGPT
     const plansData = formatPlansForAI(plans);
+
+    // Log formatted plans data if not in production
+    if (process.env.NODE_ENV !== "production") {
+      console.log("[status-summary] Formatted plans for AI:");
+      console.log(plansData);
+    }
 
     // Create prompt for ChatGPT
     const prompt = `You are an AI assistant analyzing a user's daily planner entries. Below are the last ${plans.length} daily planner entries for ${userName}. Please provide a comprehensive summary of their status, habits, mood patterns, priorities, and overall well-being.
