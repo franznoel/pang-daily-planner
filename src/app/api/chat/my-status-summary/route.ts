@@ -22,8 +22,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get last 90 daily plans for the current user
-    const plans = await getLast90Plans(userId);
+    // Get last 20 daily plans for the current user
+    const plans = await getLast20Plans(userId);
 
     // Log plans temporarily if not in production
     if (process.env.NODE_ENV !== "production") {
@@ -103,15 +103,15 @@ Keep the summary conversational, supportive, and actionable - as if you're a per
   }
 }
 
-// Helper function to get last 90 plans
-async function getLast90Plans(userId: string): Promise<DailyPlannerDocument[]> {
+// Helper function to get last 20 plans
+async function getLast20Plans(userId: string): Promise<DailyPlannerDocument[]> {
   try {
     const plansSnapshot = await adminDb
       .collection("user")
       .doc(userId)
       .collection("daily-plans")
       .orderBy("date", "desc")
-      .limit(90)
+      .limit(20)
       .get();
 
     return plansSnapshot.docs.map((doc) => doc.data() as DailyPlannerDocument);

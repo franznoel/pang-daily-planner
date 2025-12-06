@@ -155,7 +155,7 @@ function MyStatusContent() {
           <Box>
             <Typography variant="h6">Chat with Your AI Coach</Typography>
             <Typography variant="caption" color="text.secondary">
-              Get personalized advice based on your last 90 daily planner entries
+              Get personalized advice based on your last 20 daily planner entries
             </Typography>
           </Box>
         </Box>
