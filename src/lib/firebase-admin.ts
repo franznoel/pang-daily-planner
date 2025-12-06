@@ -8,24 +8,55 @@ function initializeFirebaseAdmin() {
     return apps[0];
   }
 
-  // In development with emulators, use demo credentials
   const isDevelopment = process.env.NODE_ENV !== "production";
-  
-  if (isDevelopment) {
-    // Use emulator with demo project
-    return admin.initializeApp({
-      projectId: "demo-project",
-    });
+
+  // Try to parse __FIREBASE_DEFAULTS__ if available (used by Firebase Functions)
+  let firebaseDefaults;
+  if (process.env.__FIREBASE_DEFAULTS__) {
+    try {
+      firebaseDefaults = JSON.parse(process.env.__FIREBASE_DEFAULTS__);
+    } catch (e) {
+      console.error("Failed to parse __FIREBASE_DEFAULTS__:", e);
+    }
+  }
+
+  // Build config from __FIREBASE_DEFAULTS__ or environment variables
+  const projectId = 
+    firebaseDefaults?.projectId ||
+    process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ||
+    (isDevelopment ? "demo-project" : undefined);
+
+  const databaseURL = firebaseDefaults?.databaseURL;
+  const storageBucket = firebaseDefaults?.storageBucket;
+
+  const config: admin.AppOptions = {
+    projectId,
+  };
+
+  // Add optional fields if available
+  if (databaseURL) {
+    config.databaseURL = databaseURL;
+  }
+  if (storageBucket) {
+    config.storageBucket = storageBucket;
+  }
+
+  // In development with emulators or when no credentials are needed
+  if (isDevelopment || firebaseDefaults) {
+    return admin.initializeApp(config);
   }
 
   // In production, Firebase Admin SDK uses Application Default Credentials (ADC)
   // This works automatically in Firebase Functions, Cloud Run, etc.
-  // For local development with production, set GOOGLE_APPLICATION_CREDENTIALS
-  return admin.initializeApp();
+  return admin.initializeApp(config);
 }
 
 export const adminApp = initializeFirebaseAdmin();
+
+// Get Firestore with default database
+// Use (default) database to match client-side Firebase
 export const adminDb = admin.firestore();
+
 export const adminAuth = admin.auth();
 
 // Set Firestore emulator if in development and not already set

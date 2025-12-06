@@ -14,7 +14,12 @@ admin.initializeApp({
   projectId: 'demo-project'
 });
 
+// Use default database (same as client-side Firebase)
 const db = admin.firestore();
+// Explicitly use default database
+db.settings({
+  ignoreUndefinedProperties: true
+});
 
 // Recursively import data from seed structure
 async function importCollection(collectionPath, data) {
