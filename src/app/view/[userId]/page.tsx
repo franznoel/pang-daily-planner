@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import {
   Box,
   Card,
@@ -10,7 +10,9 @@ import {
   Alert,
   Divider,
   Grid,
+  Button,
 } from "@mui/material";
+import ChatIcon from "@mui/icons-material/Chat";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -162,6 +164,7 @@ function ReadOnlySchedule({
 function SharedPlanViewContent() {
   const params = useParams();
   const userId = params.userId as string;
+  const router = useRouter();
   const { user } = useAuth();
 
   const [selectedDate, setSelectedDate] = useState<Dayjs | null>(dayjs());
@@ -244,12 +247,24 @@ function SharedPlanViewContent() {
 
       <Card sx={{ p: 4, maxWidth: 1200, margin: "auto", mt: 4, mb: 7 }}>
         <Box sx={{ mb: 3 }}>
-          <Typography variant="h4" fontWeight={600} gutterBottom>
-            Viewing Shared Plan
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            You are viewing plans shared by: {ownerDisplayName || userId}
-          </Typography>
+          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 2 }}>
+            <Box>
+              <Typography variant="h4" fontWeight={600} gutterBottom>
+                Viewing Shared Plan
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                You are viewing plans shared by: {ownerDisplayName || userId}
+              </Typography>
+            </Box>
+            <Button
+              variant="contained"
+              startIcon={<ChatIcon />}
+              onClick={() => router.push(`/view/${userId}/status`)}
+              sx={{ ml: 2 }}
+            >
+              Chat with AI
+            </Button>
+          </Box>
 
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <DatePicker

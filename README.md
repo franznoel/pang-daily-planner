@@ -39,6 +39,39 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 | `npm run storybook` | Start Storybook development server on port 6006 |
 | `npm run build-storybook` | Build Storybook for static deployment |
 | `npm run deploy` | Deploy to Firebase |
+| `npm run emulators` | Start Firebase emulators |
+| `npm run emulators:seed` | Generate seed data and start emulators |
+| `npm run seed:generate` | Generate mock seed data |
+| `npm run seed:import` | Import seed data to running emulators |
+
+## Development with Firebase Emulators
+
+For local development with mock data:
+
+```bash
+# Quick start with seed data (recommended)
+npm run emulators:seed
+
+# Then in another terminal, import the seed data
+npm run seed:import
+
+# Start the Next.js dev server
+npm run dev
+```
+
+This will:
+1. Generate mock data (2 users with daily planner entries)
+2. Start Firebase Firestore and Auth emulators
+3. Automatically import the seed data
+
+### Mock Test Users
+
+- **Owner**: `owner@example.com` (100 daily plans)
+- **Viewer**: `viewer@example.com` (10 daily plans, can view owner's plans)
+
+When signing in through the Auth emulator, use these email addresses. The emulator will create test accounts automatically.
+
+See [seed-data/README.md](seed-data/README.md) for more details.
 
 ## Project Structure
 
