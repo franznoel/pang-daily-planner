@@ -5,24 +5,28 @@ This directory contains scripts and data to populate the Firebase Firestore emul
 ## Overview
 
 The seed data includes:
-- **2 Mock Users**: Owner and Viewer
+- **2 Mock Users**: Owner and Viewer (created in Firebase Auth first)
 - **100 Daily Plans** for the owner (last 100 days)
 - **10 Daily Plans** for the viewer (last 10 days)
 - **Viewer Access**: Viewer has permission to see owner's plans
 - **Realistic Data**: Daily plans include varied habits, moods, schedules, and priorities
+
+**Important**: The import script creates Firebase Auth users first, then uses their real UIDs to generate Firestore documents. This ensures the UIDs match between Auth and Firestore.
 
 ## Mock Users
 
 ### Owner Account
 - **Email**: `owner@example.com`
 - **Display Name**: John Owner
-- **UID**: `mock-user-owner-uid-001`
+- **Password**: `password123`
+- **UID**: Generated dynamically by Firebase Auth
 - Has 100 daily planner entries
 
 ### Viewer Account
 - **Email**: `viewer@example.com`
 - **Display Name**: Jane Viewer
-- **UID**: `mock-user-viewer-uid-002`
+- **Password**: `password123`
+- **UID**: Generated dynamically by Firebase Auth
 - Has 10 daily planner entries
 - Has global viewer access to owner's plans
 
@@ -67,15 +71,19 @@ If you prefer to run steps individually:
 1. Go to the login page
 2. Click "Sign in with Google"
 3. In the Firebase Auth emulator popup, enter: `owner@example.com`
-4. You'll see 100 days of daily planner data
+4. The Auth emulator will use the pre-created account with real UID
+5. You'll see 100 days of daily planner data
 
 ### Sign In as Viewer
 1. Go to the login page
 2. Click "Sign in with Google"
 3. In the Firebase Auth emulator popup, enter: `viewer@example.com`
-4. Navigate to "Shared Plans" to see owner's plans
-5. Click on owner's plans to view them
-6. Use "Chat with AI" to get AI insights about the owner's status
+4. The Auth emulator will use the pre-created account with real UID
+5. Navigate to "Shared Plans" to see owner's plans
+6. Click on owner's plans to view them
+7. Use "Chat with AI" to get AI insights about the owner's status
+
+**Note**: The seed import creates real Firebase Auth users, so the UIDs in Firestore match the Auth UIDs. You can also view the Auth emulator UI at http://localhost:9099 to see the created users.
 
 ### Testing AI Features
 
