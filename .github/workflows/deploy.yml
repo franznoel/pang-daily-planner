@@ -56,3 +56,4 @@ jobs:
         env:
           NODE_ENV: production
           FIREBASE_CLI_EXPERIMENTS: webframeworks
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY_DEV }}
