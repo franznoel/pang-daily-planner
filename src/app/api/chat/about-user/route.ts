@@ -31,8 +31,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get last 10 daily plans (cached context)
-    const plans = await getLast10Plans(userId);
+    // Get last 1 daily plan (cached context)
+    const plans = await getLast1Plan(userId);
 
     // Log plans temporarily if not in production
     if (process.env.NODE_ENV !== "production") {
@@ -130,15 +130,15 @@ async function checkViewerAccess(
   }
 }
 
-// Helper function to get last 10 plans
-async function getLast10Plans(userId: string): Promise<DailyPlannerDocument[]> {
+// Helper function to get last 1 plan
+async function getLast1Plan(userId: string): Promise<DailyPlannerDocument[]> {
   try {
     const plansSnapshot = await adminDb
       .collection("user")
       .doc(userId)
       .collection("daily-plans")
       .orderBy("date", "desc")
-      .limit(10)
+      .limit(1)
       .get();
 
     return plansSnapshot.docs.map((doc) => doc.data() as DailyPlannerDocument);

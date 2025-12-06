@@ -36,6 +36,7 @@ function ChatStatusContent() {
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const hasLoadedRef = useRef(false);
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -44,9 +45,10 @@ function ChatStatusContent() {
 
   // Load initial summary on mount
   useEffect(() => {
-    if (!user?.email) return;
+    if (!user?.email || hasLoadedRef.current) return;
 
     const loadInitialSummary = async () => {
+      hasLoadedRef.current = true;
       setLoading(true);
       setError(null);
 

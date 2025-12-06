@@ -34,6 +34,7 @@ function MyStatusContent() {
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const hasLoadedRef = useRef(false);
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -42,9 +43,10 @@ function MyStatusContent() {
 
   // Load initial summary on mount
   useEffect(() => {
-    if (!user?.uid) return;
+    if (!user?.uid || hasLoadedRef.current) return;
 
     const loadInitialSummary = async () => {
+      hasLoadedRef.current = true;
       setLoading(true);
       setError(null);
 
@@ -155,7 +157,7 @@ function MyStatusContent() {
           <Box>
             <Typography variant="h6">Chat with Your AI Coach</Typography>
             <Typography variant="caption" color="text.secondary">
-              Get personalized advice based on your last 20 daily planner entries
+              Get personalized advice based on your last 5 daily planner entries
             </Typography>
           </Box>
         </Box>
