@@ -1,0 +1,40 @@
+name: Deploy to Firebase Preview Channel
+
+on:
+  pull_request:
+
+permissions:
+  contents: write
+  deployments: write
+  checks: write
+  pull-requests: write
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build Next.js app
+        run: npm run build
+
+      - name: Deploy to Firebase Hosting Preview Channel
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_PANG_DAILY_PLANNER }}
+          projectId: pang-daily-planner
+          channelId: pr-${{ github.event.pull_request.number }}
+        env:
+          NODE_ENV: production
+          FIREBASE_CLI_EXPERIMENTS: webframeworks
