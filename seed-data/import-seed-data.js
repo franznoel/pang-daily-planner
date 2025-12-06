@@ -12,7 +12,7 @@ process.env.FIRESTORE_EMULATOR_HOST = 'localhost:8081';
 process.env.FIREBASE_AUTH_EMULATOR_HOST = 'localhost:9099';
 
 admin.initializeApp({
-  projectId: 'demo-project'
+  projectId: "pang-daily-planner",
 });
 
 // Use default database (same as client-side Firebase)
