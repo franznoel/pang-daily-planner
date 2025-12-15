@@ -7,7 +7,6 @@ import {
   getDailyPlan,
   saveDailyPlan,
   getMostRecentDailyPlan,
-  getDatesWithPlans,
   DailyPlannerDocument,
   extractIncompleteHabits,
   extractIncompletePriorities,
