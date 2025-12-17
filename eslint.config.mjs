@@ -14,6 +14,11 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // Seed data scripts (Node.js CommonJS)
     "seed-data/**",
+    ".firebase/**",
+    // Custom ignores:
+    "public/**",
+    "scripts/**",
+    "tests/e2e/**",
   ]),
 ]);
 
