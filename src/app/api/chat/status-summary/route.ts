@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
     const plans = await getLast1Plan(userId);
 
     // Log plans temporarily if not in production
-    if (process.env.NODE_ENV !== "production") {
+    if (process.env.APP_ENV !== "production") {
       console.log(`[status-summary] Fetched ${plans.length} plans for user ${userId}`);
       console.log("[status-summary] Plans data:", JSON.stringify(plans, null, 2));
     }
@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
     const plansData = formatPlansForAI(plans);
 
     // Log formatted plans data if not in production
-    if (process.env.NODE_ENV !== "production") {
+    if (process.env.APP_ENV !== "production") {
       console.log("[status-summary] Formatted plans for AI:");
       console.log(plansData);
     }

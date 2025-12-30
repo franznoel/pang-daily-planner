@@ -8,7 +8,7 @@ function initializeFirebaseAdmin() {
     return apps[0];
   }
 
-  const isDevelopment = process.env.NODE_ENV !== "production";
+  const isDevelopment = process.env.APP_ENV !== "production";
 
   // Try to parse __FIREBASE_DEFAULTS__ if available (used by Firebase Functions)
   let firebaseDefaults;
@@ -60,6 +60,6 @@ export const adminDb = admin.firestore();
 export const adminAuth = admin.auth();
 
 // Set Firestore emulator if in development and not already set
-if (process.env.NODE_ENV !== "production" && !process.env.FIRESTORE_EMULATOR_HOST) {
+if (process.env.APP_ENV !== "production" && !process.env.FIRESTORE_EMULATOR_HOST) {
   process.env.FIRESTORE_EMULATOR_HOST = "localhost:8081";
 }
