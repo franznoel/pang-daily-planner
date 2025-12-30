@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     const plans = await getLast5Plans(userId);
 
     // Log plans temporarily if not in production
-    if (process.env.NODE_ENV !== "production") {
+    if (process.env.APP_ENV !== "production") {
       console.log(`[about-me] Fetched ${plans.length} plans for user ${userId}`);
       console.log("[about-me] Plans data:", JSON.stringify(plans, null, 2));
     }
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
     const plansData = formatPlansForAI(plans);
 
     // Log formatted plans data if not in production
-    if (process.env.NODE_ENV !== "production") {
+    if (process.env.APP_ENV !== "production") {
       console.log("[about-me] Formatted plans for AI:");
       console.log(plansData);
     }
