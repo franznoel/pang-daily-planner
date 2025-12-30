@@ -1,6 +1,25 @@
 import { DailyPlannerDocument } from "@/lib/dailyPlannerService";
 
 /**
+ * Get the appropriate OpenAI API key based on the environment
+ * Uses OPENAI_API_KEY_PROD in production, OPENAI_API_KEY_DEV otherwise
+ */
+export function getOpenAIApiKey(): string {
+  const isProduction = process.env.APP_ENV === "production";
+  const apiKey = isProduction
+    ? process.env.OPENAI_API_KEY_PROD
+    : process.env.OPENAI_API_KEY_DEV;
+  
+  if (!apiKey) {
+    throw new Error(
+      `Missing OpenAI API key. Expected ${isProduction ? "OPENAI_API_KEY_PROD" : "OPENAI_API_KEY_DEV"} to be set.`
+    );
+  }
+  
+  return apiKey;
+}
+
+/**
  * Format daily planner entries for AI consumption
  * Extracts key information from plans in a readable format
  */
