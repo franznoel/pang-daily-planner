@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 import { adminDb } from "@/lib/firebase-admin";
 import { DailyPlannerDocument } from "@/lib/dailyPlannerService";
-import { formatPlansForAI } from "@/lib/ai-utils";
+import { formatPlansForAI, getOpenAIApiKey } from "@/lib/ai-utils";
 
 // Set max duration to 60 seconds
 export const maxDuration = 60;
@@ -10,7 +10,7 @@ export const maxDuration = 60;
 // Lazy initialize OpenAI client
 function getOpenAIClient() {
   return new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
+    apiKey: getOpenAIApiKey(),
   });
 }
 
