@@ -21,6 +21,10 @@ jobs:
       NEXT_PUBLIC_FIREBASE_APP_ID: ${{ vars.NEXT_PUBLIC_FIREBASE_APP_ID }}
       NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID: ${{ vars.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID }}
 
+      # If this is what triggers functions/secret validation for you on PRs,
+      # consider removing it from preview deployments.
+      FIREBASE_CLI_EXPERIMENTS: webframeworks
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -29,9 +33,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: 'npm'
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Build Next.js app
         run: npm run build
@@ -45,4 +50,3 @@ jobs:
           channelId: pr-${{ github.event.pull_request.number }}
         env:
           NODE_ENV: development
-          FIREBASE_CLI_EXPERIMENTS: webframeworks
