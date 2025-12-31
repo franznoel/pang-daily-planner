@@ -1,4 +1,17 @@
-import { HabitItem, PriorityItem } from "@/components/types";
+/**
+ * Shared types that can be used by both client and server code.
+ * This file should NOT import any Firebase SDK (neither client nor admin).
+ */
+
+export interface HabitItem {
+  checked: boolean;
+  text: string;
+}
+
+export interface PriorityItem {
+  checked: boolean;
+  text: string;
+}
 
 /**
  * Type for Firestore-serializable daily planner state (without Dayjs)

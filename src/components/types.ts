@@ -1,14 +1,8 @@
 import { Dayjs } from "dayjs";
+import type { HabitItem, PriorityItem } from "@/lib/types";
 
-export interface HabitItem {
-  checked: boolean;
-  text: string;
-}
-
-export interface PriorityItem {
-  checked: boolean;
-  text: string;
-}
+// Re-export shared types for backward compatibility
+export type { HabitItem, PriorityItem };
 
 export interface ScheduleEvent {
   id: string;

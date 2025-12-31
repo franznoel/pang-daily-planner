@@ -14,12 +14,14 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 import { getFirestoreDb } from "./firebase";
-import { DailyPlannerState, HabitItem, PriorityItem } from "@/components/types";
+import { DailyPlannerState } from "@/components/types";
 import type {
   DailyPlannerDocument,
   UserInfoDocument,
   ViewerDocument,
   SharedOwnerDocument,
+  HabitItem,
+  PriorityItem,
 } from "./types";
 
 // Re-export types for backward compatibility
