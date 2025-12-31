@@ -2,7 +2,7 @@
 
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
-import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
+import { AppRouterCacheProvider } from "@mui/material-nextjs/v16-appRouter";
 import { ThemeContextProvider, useTheme } from "./ThemeContext";
 import { getThemeById } from "./themes";
 
@@ -22,9 +22,7 @@ export function ThemeRegistry({ children }: { children: React.ReactNode }) {
   return (
     <AppRouterCacheProvider>
       <ThemeContextProvider>
-        <ThemeProviderWithContext>
-          {children}
-        </ThemeProviderWithContext>
+        <ThemeProviderWithContext>{children}</ThemeProviderWithContext>
       </ThemeContextProvider>
     </AppRouterCacheProvider>
   );

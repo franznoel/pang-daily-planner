@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import { ThemeRegistry } from "@/lib/ThemeRegistry";
-import { ApolloWrapper } from "@/lib/ApolloWrapper";
-import { AuthProvider } from "@/lib/AuthContext";
+import type { ReactNode } from "react";
+import { Providers } from "./providers";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -9,19 +8,11 @@ export const metadata: Metadata = {
   description: "A daily planner application",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <body>
-        <ApolloWrapper>
-          <ThemeRegistry>
-            <AuthProvider>{children}</AuthProvider>
-          </ThemeRegistry>
-        </ApolloWrapper>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
