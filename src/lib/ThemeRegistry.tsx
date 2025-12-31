@@ -1,8 +1,8 @@
 "use client";
 
+import React from "react";
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
-import { AppRouterCacheProvider } from "@mui/material-nextjs/v16-appRouter";
 import { ThemeContextProvider, useTheme } from "./ThemeContext";
 import { getThemeById } from "./themes";
 
@@ -20,10 +20,8 @@ function ThemeProviderWithContext({ children }: { children: React.ReactNode }) {
 
 export function ThemeRegistry({ children }: { children: React.ReactNode }) {
   return (
-    <AppRouterCacheProvider>
-      <ThemeContextProvider>
-        <ThemeProviderWithContext>{children}</ThemeProviderWithContext>
-      </ThemeContextProvider>
-    </AppRouterCacheProvider>
+    <ThemeContextProvider>
+      <ThemeProviderWithContext>{children}</ThemeProviderWithContext>
+    </ThemeContextProvider>
   );
 }
