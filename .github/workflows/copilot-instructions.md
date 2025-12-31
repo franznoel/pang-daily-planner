@@ -73,27 +73,56 @@ When touching GraphQL code:
 
 ## 🔥 FIREBASE RULES
 
-### For Firebase Admin:
-- Only used in:
-  - Next.js **server-only** code (`app/api/*`) or Server Actions
-- Do not create or rely on a separate Firebase Functions project/directory in this repository. All backend logic that requires the Admin SDK should be placed in `app/api/...` route handlers (or in server-only modules imported by those handlers).
+### CRITICAL: Firebase SDK Separation
 
-### For Firebase Client SDK:
-- Only used in:
-  - React client components
-  - `src/lib/firebase/client.ts`
+**Backend (Server-side) Code:**
+- **MUST** use `src/lib/firebase-admin.ts` (Firebase Admin SDK)
+- **MUST** import `adminDb`, `adminAuth`, `adminApp` from `@/lib/firebase-admin`
+- Used in:
+  - Next.js API routes (`src/app/api/**/*.ts`)
+  - Next.js Server Actions (files with `"use server"` directive)
+  - Server Components (components without `"use client"` directive)
+  - Any server-side utility functions
 
-### File layout recommendations
-- `src/lib/firebase/client.ts` — initializes client SDK for browser usage
-- `src/lib/firebase/admin.ts` — initializes Admin SDK in a server-only context (import only from `app/api/*` or server components)
-- Avoid committing service account JSON; instead use environment variables or Firebase project config injected at deploy time.
+**Frontend (Client-side) Code:**
+- **MUST** use `src/lib/firebase.ts` (Firebase Client SDK)
+- **MUST** import `getFirebaseAuth`, `getFirestoreDb`, `getGoogleProvider` from `@/lib/firebase`
+- Used in:
+  - React Client Components (files with `"use client"` directive)
+  - Client-side hooks and utilities
+  - Browser-only code
+
+### Protection Against Mixing SDKs
+- The file `src/lib/firebase.ts` has `import "client-only"` at the top, which will cause a build error if accidentally imported into server code
+- The file `src/lib/types.ts` contains shared types (like `DailyPlannerDocument`) that can be safely imported by both client and server code
+- **NEVER** import `src/lib/firebase.ts` (or any module that imports it) from server-side code
+- **NEVER** import `src/lib/firebase-admin.ts` from client-side code
+
+### Shared Types
+- All types that need to be shared between client and server (e.g., `DailyPlannerDocument`, `UserInfoDocument`) are defined in `src/lib/types.ts`
+- This file must NOT import any Firebase SDK (neither client nor admin)
+- Use `import type { ... } from "@/lib/types"` in both client and server code
+
+### File layout
+- `src/lib/firebase.ts` — Client SDK initialization (browser only, has `import "client-only"`)
+- `src/lib/firebase-admin.ts` — Admin SDK initialization (server only)
+- `src/lib/types.ts` — Shared types (no Firebase imports)
+- `src/lib/dailyPlannerService.ts` — Client-side Firestore operations (uses client SDK, has `"use client"`)
 
 ### Absolutely forbidden:
-- Using Admin SDK in the browser  
-- Calling OpenAI API from client components  
-- Committing Firebase service account JSON  
+- Using Admin SDK in the browser or client components
+- Using Client SDK in API routes, server actions, or server components
+- Importing `src/lib/firebase.ts` or `src/lib/dailyPlannerService.ts` from server-side code
+- Calling OpenAI API from client components
+- Committing Firebase service account JSON
+
+### Environment Variables
+- Client SDK uses `NEXT_PUBLIC_*` environment variables (available in browser)
+- Admin SDK uses server-only environment variables (not prefixed with `NEXT_PUBLIC_`)
+- Always use `process.env.NODE_ENV` to check environment (not custom env vars)
 
 Notes:
+- Do not create or rely on a separate Firebase Functions project/directory in this repository. All backend logic that requires the Admin SDK should be placed in `app/api/...` route handlers (or in server-only modules imported by those handlers).
 - If you need background jobs, long-running tasks, or scheduled tasks that cannot run in serverless route handlers, discuss an external service (Cloud Run/Cron or a managed Cloud Function outside this repo). But the default for this project is to keep everything inside `app/api/*`.
 
 ---

@@ -14,41 +14,23 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 import { getFirestoreDb } from "./firebase";
-import { DailyPlannerState, HabitItem, PriorityItem } from "@/components/types";
+import { DailyPlannerState } from "@/components/types";
+import type {
+  DailyPlannerDocument,
+  UserInfoDocument,
+  ViewerDocument,
+  SharedOwnerDocument,
+  HabitItem,
+  PriorityItem,
+} from "./types";
 
-// Type for Firestore-serializable daily planner state (without Dayjs)
-export interface DailyPlannerDocument {
-  date: string; // ISO date string YYYY-MM-DD
-  energyLevel: string;
-  mood: string;
-  gratefulFor: string[];
-  excitedAbout: string[];
-  peopleToSee: string[];
-  mindHabits: HabitItem[];
-  bodyHabits: HabitItem[];
-  spiritHabits: HabitItem[];
-  meals: string;
-  water: string;
-  intention: string;
-  iAm: string;
-  scheduleEvents: {
-    id: string;
-    title: string;
-    start: string;
-    end: string;
-    description?: string;
-  }[];
-  topPriorities: PriorityItem[];
-  professionalPriorities: PriorityItem[];
-  personalPriorities: PriorityItem[];
-  infinitePossibilities: string;
-  whatInspiredMe: string;
-  positiveThings: string[];
-  whatDidIDoWell: string;
-  whatDidILearn: string;
-  updatedAt?: string;
-  createdAt?: string;
-}
+// Re-export types for backward compatibility
+export type {
+  DailyPlannerDocument,
+  UserInfoDocument,
+  ViewerDocument,
+  SharedOwnerDocument,
+};
 
 /**
  * Converts DailyPlannerState to a Firestore-serializable document
@@ -178,15 +160,6 @@ export async function getDatesWithPlans(userId: string): Promise<string[]> {
 }
 
 /**
- * User info document structure
- */
-export interface UserInfoDocument {
-  email?: string;
-  displayName?: string;
-  createdAt?: string;
-}
-
-/**
  * Get user info (email and displayName) from Firestore by userId
  */
 export async function getUserInfo(userId: string): Promise<UserInfoDocument | null> {
@@ -269,18 +242,6 @@ export function extractIncompletePriorities(priorities: PriorityItem[]): Priorit
 // ============================================================================
 // VIEWER MANAGEMENT FUNCTIONS
 // ============================================================================
-
-export interface ViewerDocument {
-  email: string;
-  addedAt: string;
-}
-
-export interface SharedOwnerDocument {
-  ownerId: string;
-  ownerEmail?: string;
-  sharedAt: string;
-  type: "global" | "daily";
-}
 
 /**
  * Add a viewer to access all of a user's daily plans

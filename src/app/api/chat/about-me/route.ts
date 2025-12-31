@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 import { adminDb } from "@/lib/firebase-admin";
-import { DailyPlannerDocument } from "@/lib/dailyPlannerService";
+import type { DailyPlannerDocument } from "@/lib/types";
 import { formatPlansForAI } from "@/lib/ai-utils";
 
 // Set max duration to 60 seconds
