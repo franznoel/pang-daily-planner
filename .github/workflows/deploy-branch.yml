@@ -38,6 +38,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Debug - show client directives
+        run: |
+          echo "apollo-client.ts:" && head -n 20 src/lib/apollo-client.ts
+          echo ""
+          echo "themes.ts:" && head -n 20 src/lib/themes.ts
+          echo ""
+          echo "theme.ts:" && head -n 20 src/lib/theme.ts
+
       - name: Build Next.js app
         run: npm run build
 
