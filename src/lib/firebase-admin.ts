@@ -9,8 +9,6 @@ function initializeFirebaseAdmin() {
     return apps[0];
   }
 
-  const isDevelopment = process.env.APP_ENV !== "production";
-
   // Use the shared firebaseConfig for consistency with client-side
   const config: admin.AppOptions = {
     projectId: firebaseConfig.projectId,
@@ -21,13 +19,9 @@ function initializeFirebaseAdmin() {
     config.storageBucket = firebaseConfig.storageBucket;
   }
 
-  // In development with emulators or when no credentials are needed
-  if (isDevelopment) {
-    return admin.initializeApp(config);
-  }
-
   // In production, Firebase Admin SDK uses Application Default Credentials (ADC)
   // This works automatically in Firebase Functions, Cloud Run, etc.
+  // In development, it works with emulators without credentials
   return admin.initializeApp(config);
 }
 
