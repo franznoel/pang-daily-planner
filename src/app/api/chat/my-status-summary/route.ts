@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 import { adminDb } from "@/lib/firebase-admin";
-import type { DailyPlannerDocument } from "@/lib/types";
-import { formatPlansForAI } from "@/lib/ai-utils";
+import { DailyPlannerDocument } from "@/lib/dailyPlannerService";
+import { formatPlansForAI, getOpenAIApiKey } from "@/lib/ai-utils";
 
 // Set max duration to 60 seconds
 export const maxDuration = 60;
@@ -10,7 +10,7 @@ export const maxDuration = 60;
 // Lazy initialize OpenAI client
 function getOpenAIClient() {
   return new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
+    apiKey: getOpenAIApiKey(),
   });
 }
 
@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     const plans = await getLast5Plans(userId);
 
     // Log plans temporarily if not in production
-    if (process.env.NODE_ENV !== "production") {
+    if (process.env.APP_ENV !== "production") {
       console.log(`[my-status-summary] Fetched ${plans.length} plans for user ${userId}`);
       console.log("[my-status-summary] Plans data:", JSON.stringify(plans, null, 2));
     }
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
     const plansData = formatPlansForAI(plans);
 
     // Log formatted plans data if not in production
-    if (process.env.NODE_ENV !== "production") {
+    if (process.env.APP_ENV !== "production") {
       console.log("[my-status-summary] Formatted plans for AI:");
       console.log(plansData);
     }

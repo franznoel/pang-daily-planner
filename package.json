@@ -38,8 +38,8 @@
     "graphql": "^16.12.0",
     "next": "16.0.10",
     "openai": "^6.10.0",
-    "react": "19.2.3",
-    "react-dom": "19.2.0"
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^4.1.3",
