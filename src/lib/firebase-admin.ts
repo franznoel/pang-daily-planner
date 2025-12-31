@@ -1,5 +1,6 @@
 import * as admin from "firebase-admin";
 import { getApps } from "firebase-admin/app";
+import { firebaseConfig } from "./firebase-config";
 
 // Initialize Firebase Admin SDK (singleton pattern)
 function initializeFirebaseAdmin() {
@@ -10,39 +11,18 @@ function initializeFirebaseAdmin() {
 
   const isDevelopment = process.env.APP_ENV !== "production";
 
-  // Try to parse __FIREBASE_DEFAULTS__ if available (used by Firebase Functions)
-  let firebaseDefaults;
-  if (process.env.__FIREBASE_DEFAULTS__) {
-    try {
-      firebaseDefaults = JSON.parse(process.env.__FIREBASE_DEFAULTS__);
-    } catch (e) {
-      console.error("Failed to parse __FIREBASE_DEFAULTS__:", e);
-    }
-  }
-
-  // Build config from __FIREBASE_DEFAULTS__ or environment variables
-  const projectId = 
-    firebaseDefaults?.projectId ||
-    process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ||
-    (isDevelopment ? "demo-project" : undefined);
-
-  const databaseURL = firebaseDefaults?.databaseURL;
-  const storageBucket = firebaseDefaults?.storageBucket;
-
+  // Use the shared firebaseConfig for consistency with client-side
   const config: admin.AppOptions = {
-    projectId,
+    projectId: firebaseConfig.projectId,
   };
 
-  // Add optional fields if available
-  if (databaseURL) {
-    config.databaseURL = databaseURL;
-  }
-  if (storageBucket) {
-    config.storageBucket = storageBucket;
+  // Add storage bucket if available
+  if (firebaseConfig.storageBucket) {
+    config.storageBucket = firebaseConfig.storageBucket;
   }
 
   // In development with emulators or when no credentials are needed
-  if (isDevelopment || firebaseDefaults) {
+  if (isDevelopment) {
     return admin.initializeApp(config);
   }
 
