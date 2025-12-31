@@ -1,8 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Static export is disabled to support Server Actions
-  // For Firebase deployment, use Firebase Functions or Cloud Run
+  // Explicitly set output to 'standalone' to prevent static export
+  // This is required because we use client components with React Context
+  output: 'standalone',
   images: {
     unoptimized: true,
   },
