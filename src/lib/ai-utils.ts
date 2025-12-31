@@ -1,4 +1,4 @@
-import { DailyPlannerDocument } from "@/lib/dailyPlannerService";
+import type { DailyPlannerDocument } from "@/lib/types";
 
 /**
  * Format daily planner entries for AI consumption
