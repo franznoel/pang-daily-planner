@@ -2,7 +2,15 @@
 
 ## Overview
 
-This project uses Firebase Emulators for local development and testing. The Cloud Functions that handle API requests are accessible through the hosting emulator which routes requests according to the rewrites configuration.
+This project uses Firebase Emulators for local development and testing. The Cloud Functions that handle API requests need to be properly built and the emulators need to be started correctly.
+
+## Prerequisites
+
+Before running the emulators, make sure functions are built:
+
+```bash
+cd functions && npm install && npm run build && cd ..
+```
 
 ## Emulator Configuration
 
@@ -16,127 +24,185 @@ The emulators are configured in `firebase.json`:
 
 ## Starting the Emulators
 
-### Option 1: Start All Emulators (Recommended for testing functions)
+### Step 1: Build Functions
+
+```bash
+cd functions
+npm install
+npm run build
+cd ..
+```
+
+### Step 2: Start All Emulators
 
 ```bash
 npm run emulators
 ```
 
-This starts:
-- Auth emulator
-- Firestore emulator  
-- Functions emulator
-- Hosting emulator (serves Next.js with function rewrites)
-- Emulator UI
-
-### Option 2: Start Only Firestore (for frontend development)
+Or use Firebase CLI directly:
 
 ```bash
-npm run dev:emulators
+firebase emulators:start
 ```
 
-This only starts the Firestore emulator for frontend development.
+This starts all emulators including hosting which enables function rewrites.
 
 ## Testing Cloud Functions
 
-### Important: Use the Hosting Emulator Port
+### Method 1: Through Hosting Emulator (Recommended - Mirrors Production)
 
-When the emulators are running, Cloud Functions are accessible through the **hosting emulator** (port 5002), not directly through the functions emulator (port 5001).
-
-**Correct URLs:**
-- ✅ `http://localhost:5002/api/chat/my-status-summary` (via hosting emulator)
-- ✅ `http://localhost:5002/api/chat/about-me`
-- ✅ `http://localhost:5002/api/chat/about-user`
-- ✅ `http://localhost:5002/api/chat/status-summary`
-
-**Incorrect URLs:**
-- ❌ `http://localhost:5001/api/chat/my-status-summary` (functions emulator doesn't handle rewrites)
-- ❌ `http://localhost:3000/api/chat/my-status-summary` (Next.js dev server doesn't have the functions)
-
-### Direct Function Access (without rewrites)
-
-If you want to call functions directly (bypassing rewrites), use:
-
-```
-http://localhost:5001/pang-daily-planner/us-central1/myStatusSummary
-```
-
-Format: `http://localhost:5001/{project-id}/{region}/{functionName}`
-
-## Example API Call
+When emulators are running, access functions through the **hosting emulator** which handles rewrites:
 
 ```bash
-# Test myStatusSummary function
+# Test myStatusSummary
 curl -X POST http://localhost:5002/api/chat/my-status-summary \
+  -H "Content-Type: application/json" \
+  -d '{"userId": "test-user-id"}'
+
+# Test aboutMe  
+curl -X POST http://localhost:5002/api/chat/about-me \
+  -H "Content-Type: application/json" \
+  -d '{"userId": "test-user-id", "message": "Hello", "conversationHistory": []}'
+
+# Test aboutUser
+curl -X POST http://localhost:5002/api/chat/about-user \
+  -H "Content-Type: application/json" \
+  -d '{"userId": "test-user-id", "viewerEmail": "viewer@example.com", "message": "Hello", "conversationHistory": []}'
+
+# Test statusSummary
+curl -X POST http://localhost:5002/api/chat/status-summary \
+  -H "Content-Type: application/json" \
+  -d '{"userId": "test-user-id", "viewerEmail": "viewer@example.com"}'
+```
+
+### Method 2: Direct Function Access (Bypassing Rewrites)
+
+For debugging, call functions directly on the functions emulator:
+
+```bash
+# Direct function call (full path required)
+curl -X POST http://localhost:5001/pang-daily-planner/us-central1/myStatusSummary \
   -H "Content-Type: application/json" \
   -d '{"userId": "test-user-id"}'
 ```
 
-## Running Next.js + Emulators Together
+Format: `http://localhost:5001/{project-id}/{region}/{functionName}`
 
-To run the full development environment:
+## Important Notes
 
-1. **Terminal 1**: Start Firebase Emulators
-   ```bash
-   npm run emulators
-   ```
+### Hosting Emulator vs Functions Emulator
 
-2. **Terminal 2**: Start Next.js Dev Server (optional, for frontend development)
-   ```bash
-   npm run dev
-   ```
+- **Port 5002 (Hosting)**: ✅ Use this for `/api/chat/*` paths (uses rewrites from firebase.json)
+- **Port 5001 (Functions)**: Use full path `/pang-daily-planner/us-central1/functionName`
+- **Port 3000 (Next.js dev)**: ❌ Does NOT have access to Cloud Functions
 
-Note: When using the hosting emulator (port 5002), you get both the Next.js app AND the Cloud Functions accessible through rewrites. The Next.js dev server (port 3000) is only needed for hot-reload during frontend development.
+### Why Both Ports?
+
+- **Functions Emulator (5001)**: Runs the Cloud Functions code
+- **Hosting Emulator (5002)**: Serves Next.js app AND proxies `/api/chat/*` requests to functions emulator based on rewrites
+
+The hosting emulator reads the rewrites in `firebase.json` and forwards matching requests to the functions emulator.
+
+## Running Next.js Dev Server Separately
+
+If you want hot-reload for frontend development:
+
+**Terminal 1 - Emulators (for backend functions):**
+```bash
+npm run emulators
+```
+
+**Terminal 2 - Next.js Dev (for frontend hot-reload):**
+```bash
+npm run dev
+```
+
+Note: Next.js dev server (port 3000) won't have access to functions. You'll need to update frontend code to call `http://localhost:5002/api/chat/*` instead of `/api/chat/*` when developing locally, OR just use the hosting emulator at port 5002 for everything.
 
 ## Environment Variables
 
-Make sure you have the following environment variables set:
+Cloud Functions in the emulator will attempt to access:
 
 ```bash
-# .env.local
 APP_ENV=development
-OPENAI_API_KEY_DEV=your-dev-key
-OPENAI_API_KEY_PROD=your-prod-key
+OPENAI_API_KEY_DEV=your-dev-key-here
+OPENAI_API_KEY_PROD=your-prod-key-here
 ```
 
-For the emulators, secrets are accessed through Firebase Secret Manager emulation.
+For local development, these are typically accessed through Firebase Secret Manager or environment variables. Make sure to set them before deploying or testing functions that require OpenAI.
 
 ## Troubleshooting
 
-### 404 Error on `/api/chat/*` paths
+### Issue: 404 on `/api/chat/*`
 
-**Problem**: Getting Next.js 404 page when accessing function endpoints.
+**Problem**: Getting 404 when accessing `http://localhost:5002/api/chat/my-status-summary`
 
-**Solution**: Make sure you're using the hosting emulator port (5002), not the functions emulator port (5001) or Next.js dev server port (3000).
+**Solutions**:
+1. Make sure hosting emulator is running (check port 5002 is active)
+2. Verify functions are built: `cd functions && npm run build`
+3. Check firebase.json has correct rewrites configuration
+4. Restart emulators: Stop and run `npm run emulators` again
 
-### Functions not rebuilding
+### Issue: "Not Found" from Functions Emulator  
 
-**Problem**: Changes to functions aren't reflected.
+**Problem**: `http://localhost:5001/api/chat/my-status-summary` returns "Not Found"
+
+**Solution**: Functions emulator doesn't handle rewrites. Use the full function path:
+```bash
+curl -X POST http://localhost:5001/pang-daily-planner/us-central1/myStatusSummary \
+  -H "Content-Type: application/json" \
+  -d '{"userId": "test-user-id"}'
+```
+
+### Issue: Functions Not Deploying to Emulator
+
+**Problem**: Emulators start but functions aren't available
+
+**Solutions**:
+1. Ensure functions are compiled: `cd functions && npm run build`
+2. Check `functions/lib/` directory exists with `.js` files
+3. Verify `functions/package.json` has correct dependencies installed
+4. Look at emulator logs for TypeScript or runtime errors
+
+### Issue: TypeScript Build Errors
+
+**Problem**: `npm run build` fails in functions directory
 
 **Solution**: 
-1. Stop the emulators
-2. Rebuild functions: `cd functions && npm run build`
-3. Restart emulators: `npm run emulators`
+```bash
+cd functions
+npm install  # Make sure all dependencies are installed
+npm run build
+```
 
-### CORS Errors
-
-**Problem**: CORS errors when calling functions from frontend.
-
-**Solution**: All functions have `cors: true` enabled. Make sure you're calling from an allowed origin.
+If you get type errors, check `functions/tsconfig.json` configuration.
 
 ## Production Deployment
 
-When deploying to production:
+When deploying to production, both functions and hosting are deployed:
 
 ```bash
-# Deploy hosting + functions
+# Build functions first
+cd functions && npm run build && cd ..
+
+# Deploy everything
 firebase deploy
 
-# Deploy only functions
+# Or deploy separately
 firebase deploy --only functions
-
-# Deploy only hosting
 firebase deploy --only hosting
 ```
 
-The same URL paths (`/api/chat/*`) work in production through Firebase Hosting rewrites.
+The same URL paths (`/api/chat/*`) work in production through Firebase Hosting rewrites to Cloud Functions.
+
+## Quick Reference
+
+| Service | Port | URL Pattern | Purpose |
+|---------|------|-------------|---------|
+| Hosting | 5002 | `/api/chat/*` | Production-like access with rewrites |
+| Functions | 5001 | `/pang-daily-planner/us-central1/{functionName}` | Direct function access |
+| Firestore | 8081 | N/A | Database emulator |
+| Auth | 9099 | N/A | Authentication emulator |
+| UI | 4000 | N/A | Emulator suite UI dashboard |
+| Next.js Dev | 3000 | `/*` | Frontend hot-reload (no functions) |
+
