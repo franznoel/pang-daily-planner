@@ -11,26 +11,54 @@ echo ""
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Check if emulators are running
 echo "📡 Checking if emulators are running..."
-if ! curl -s http://localhost:5002 > /dev/null 2>&1; then
-    echo -e "${RED}❌ Hosting emulator (port 5002) is not running${NC}"
-    echo ""
-    echo "Please start the emulators first:"
-    echo "  cd functions && npm run build && cd .."
-    echo "  npm run emulators"
-    echo ""
-    exit 1
+
+HOSTING_RUNNING=false
+FUNCTIONS_RUNNING=false
+
+if curl -s http://localhost:5002 > /dev/null 2>&1; then
+    HOSTING_RUNNING=true
 fi
 
-if ! curl -s http://localhost:5001 > /dev/null 2>&1; then
-    echo -e "${RED}❌ Functions emulator (port 5001) is not running${NC}"
+if curl -s http://localhost:5001 > /dev/null 2>&1; then
+    FUNCTIONS_RUNNING=true
+fi
+
+if [ "$HOSTING_RUNNING" = false ] || [ "$FUNCTIONS_RUNNING" = false ]; then
+    echo -e "${RED}❌ Emulators are not running properly${NC}"
     echo ""
-    echo "Please start the emulators first:"
-    echo "  cd functions && npm run build && cd .."
+    if [ "$HOSTING_RUNNING" = false ]; then
+        echo -e "${RED}  ✗ Hosting emulator (port 5002) is not running${NC}"
+    else
+        echo -e "${GREEN}  ✓ Hosting emulator (port 5002) is running${NC}"
+    fi
+    
+    if [ "$FUNCTIONS_RUNNING" = false ]; then
+        echo -e "${RED}  ✗ Functions emulator (port 5001) is not running${NC}"
+    else
+        echo -e "${GREEN}  ✓ Functions emulator (port 5001) is running${NC}"
+    fi
+    
+    echo ""
+    echo -e "${BLUE}To start the emulators, run these commands:${NC}"
+    echo ""
+    echo "  # Step 1: Build the functions"
+    echo "  cd functions"
+    echo "  npm install"
+    echo "  npm run build"
+    echo "  cd .."
+    echo ""
+    echo "  # Step 2: Start all emulators (leave this running)"
     echo "  npm run emulators"
+    echo ""
+    echo "  # Step 3: In a NEW terminal, run this test script"
+    echo "  ./test-emulators.sh"
+    echo ""
+    echo -e "${YELLOW}Note: The emulators need to stay running while you test!${NC}"
     echo ""
     exit 1
 fi
