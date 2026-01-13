@@ -1,5 +1,3 @@
-import "client-only";
-
 import { initializeApp, getApps, FirebaseApp } from "firebase/app";
 import { getFirestore, connectFirestoreEmulator, Firestore } from "firebase/firestore";
 import { getAuth, connectAuthEmulator, GoogleAuthProvider, Auth } from "firebase/auth";
