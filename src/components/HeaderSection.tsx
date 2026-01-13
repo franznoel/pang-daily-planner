@@ -1,7 +1,5 @@
-"use client";
-
 import React from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router-dom";
 import { Box, TextField, Typography, Stack, CircularProgress, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent, Button } from "@mui/material";
 import ChatIcon from "@mui/icons-material/Chat";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -61,7 +59,7 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
   onEnergyLevelChange,
   onMoodChange,
 }) => {
-  const router = useRouter();
+  const navigate = useNavigate();
   
   // Convert array to Set for O(1) lookups in DatePicker
   const datesWithPlansSet = React.useMemo(
@@ -92,7 +90,7 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
         <Button
           variant="contained"
           startIcon={<ChatIcon />}
-          onClick={() => router.push("/status")}
+          onClick={() => navigate("/status")}
           size="small"
         >
           Chat with AI

@@ -1,7 +1,5 @@
-"use client";
-
 import React, { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   Card,
@@ -23,7 +21,7 @@ import AppBar from "@/components/AppBar";
 
 function SharedWithMeContent() {
   const { user } = useAuth();
-  const router = useRouter();
+  const navigate = useNavigate();
   const [sharedOwners, setSharedOwners] = useState<SharedOwnerDocument[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -49,7 +47,7 @@ function SharedWithMeContent() {
   }, [loadSharedOwners]);
 
   const handleViewPlanner = (ownerId: string) => {
-    router.push(`/view/${ownerId}`);
+    navigate(`/view/${ownerId}`);
   };
 
   return (
@@ -118,7 +116,7 @@ function SharedWithMeContent() {
   );
 }
 
-export default function SharedWithMePage() {
+export default function SharedPage() {
   return (
     <ProtectedRoute>
       <SharedWithMeContent />

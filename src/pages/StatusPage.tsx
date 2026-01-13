@@ -1,7 +1,5 @@
-"use client";
-
 import React, { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   Card,
@@ -25,7 +23,7 @@ interface Message {
 }
 
 function MyStatusContent() {
-  const router = useRouter();
+  const navigate = useNavigate();
   const { user } = useAuth();
 
   const [messages, setMessages] = useState<Message[]>([]);
@@ -151,7 +149,7 @@ function MyStatusContent() {
       <Card sx={{ p: 0, maxWidth: 900, margin: "auto", mt: 4, mb: 7, height: "70vh", display: "flex", flexDirection: "column" }}>
         {/* Header */}
         <Box sx={{ p: 2, borderBottom: 1, borderColor: "divider", display: "flex", alignItems: "center", gap: 1 }}>
-          <IconButton onClick={() => router.push("/")} size="small">
+          <IconButton onClick={() => navigate("/")} size="small">
             <ArrowBackIcon />
           </IconButton>
           <Box>
@@ -259,7 +257,7 @@ function MyStatusContent() {
   );
 }
 
-export default function MyStatus() {
+export default function StatusPage() {
   return (
     <ProtectedRoute>
       <MyStatusContent />

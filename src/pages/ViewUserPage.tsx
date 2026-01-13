@@ -1,7 +1,5 @@
-"use client";
-
 import React, { useState, useEffect, useCallback } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useNavigate } from "react-router-dom";
 import {
   Box,
   Card,
@@ -162,9 +160,9 @@ function ReadOnlySchedule({
 }
 
 function SharedPlanViewContent() {
-  const params = useParams();
-  const userId = params.userId as string;
-  const router = useRouter();
+  const params = useParams<{ userId: string }>();
+  const userId = params.userId!;
+  const navigate = useNavigate();
   const { user } = useAuth();
 
   const [selectedDate, setSelectedDate] = useState<Dayjs | null>(dayjs());
@@ -259,7 +257,7 @@ function SharedPlanViewContent() {
             <Button
               variant="contained"
               startIcon={<ChatIcon />}
-              onClick={() => router.push(`/view/${userId}/status`)}
+              onClick={() => navigate(`/view/${userId}/status`)}
               sx={{ ml: 2 }}
             >
               Chat with AI
@@ -279,7 +277,7 @@ function SharedPlanViewContent() {
               format="MMMM D, YYYY"
               slotProps={{ textField: { size: "small" } }}
               slots={{
-                day: (dayProps: PickersDayProps) => {
+                day: (dayProps: PickersDayProps<Dayjs>) => {
                   const day = dayProps.day as Dayjs | undefined;
                   if (!day) {
                     return null;
@@ -446,7 +444,7 @@ function SharedPlanViewContent() {
   );
 }
 
-export default function SharedPlanView() {
+export default function ViewUserPage() {
   return (
     <ProtectedRoute>
       <SharedPlanViewContent />

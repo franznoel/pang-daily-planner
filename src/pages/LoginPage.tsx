@@ -1,20 +1,18 @@
-"use client";
-
 import React, { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router-dom";
 import { Box, Button, Card, CardContent, Typography, CircularProgress } from "@mui/material";
 import GoogleIcon from "@mui/icons-material/Google";
 import { useAuth } from "@/lib/AuthContext";
 
 export default function LoginPage() {
   const { user, loading, signInWithGoogle } = useAuth();
-  const router = useRouter();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!loading && user) {
-      router.push("/");
+      navigate("/");
     }
-  }, [user, loading, router]);
+  }, [user, loading, navigate]);
 
   const handleGoogleSignIn = async () => {
     try {

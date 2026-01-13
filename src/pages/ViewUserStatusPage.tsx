@@ -1,7 +1,5 @@
-"use client";
-
 import React, { useState, useEffect, useRef } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useNavigate } from "react-router-dom";
 import {
   Box,
   Card,
@@ -25,9 +23,9 @@ interface Message {
 }
 
 function ChatStatusContent() {
-  const params = useParams();
-  const userId = params.userId as string;
-  const router = useRouter();
+  const params = useParams<{ userId: string }>();
+  const userId = params.userId!;
+  const navigate = useNavigate();
   const { user } = useAuth();
 
   const [messages, setMessages] = useState<Message[]>([]);
@@ -150,18 +148,18 @@ function ChatStatusContent() {
 
   return (
     <>
-      <AppBar title="AI Status Chat" showHomeLink />
+      <AppBar title="Chat with AI" showHomeLink />
 
       <Card sx={{ p: 0, maxWidth: 900, margin: "auto", mt: 4, mb: 7, height: "70vh", display: "flex", flexDirection: "column" }}>
         {/* Header */}
         <Box sx={{ p: 2, borderBottom: 1, borderColor: "divider", display: "flex", alignItems: "center", gap: 1 }}>
-          <IconButton onClick={() => router.push(`/view/${userId}`)} size="small">
+          <IconButton onClick={() => navigate(`/view/${userId}`)} size="small">
             <ArrowBackIcon />
           </IconButton>
           <Box>
-            <Typography variant="h6">Chat with AI</Typography>
+            <Typography variant="h6">Chat About This User</Typography>
             <Typography variant="caption" color="text.secondary">
-              Ask questions about this user&apos;s status and habits
+              Get insights based on their daily planner entry
             </Typography>
           </Box>
         </Box>
@@ -239,7 +237,7 @@ function ChatStatusContent() {
             <TextField
               fullWidth
               variant="outlined"
-              placeholder="Ask about habits, mood, priorities..."
+              placeholder="Ask about this user's habits, patterns, or get insights..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={handleKeyPress}
@@ -263,7 +261,7 @@ function ChatStatusContent() {
   );
 }
 
-export default function ChatStatus() {
+export default function ViewUserStatusPage() {
   return (
     <ProtectedRoute>
       <ChatStatusContent />

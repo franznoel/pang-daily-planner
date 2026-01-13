@@ -1,7 +1,5 @@
-"use client";
-
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router-dom";
 import {
   AppBar as MuiAppBar,
   Toolbar,
@@ -31,7 +29,7 @@ interface AppBarProps {
 
 export default function AppBar({ title = "Daily Planner", showHomeLink = false }: AppBarProps) {
   const { user, logout } = useAuth();
-  const router = useRouter();
+  const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [themeDialogOpen, setThemeDialogOpen] = useState(false);
@@ -52,7 +50,7 @@ export default function AppBar({ title = "Daily Planner", showHomeLink = false }
 
   const handleSharedWithMe = () => {
     handleClose();
-    router.push("/shared");
+    navigate("/shared");
   };
 
   const handleSharePlanner = () => {
@@ -83,7 +81,7 @@ export default function AppBar({ title = "Daily Planner", showHomeLink = false }
           {showHomeLink && (
             <IconButton
               color="inherit"
-              onClick={() => router.push("/")}
+              onClick={() => navigate("/")}
               aria-label="home"
               sx={{ mr: 1 }}
             >
