@@ -13,7 +13,40 @@
         "OPENAI_API_KEY_PROD",
         "APP_ENV"
       ]
-    }
+    },
+    "rewrites": [
+      {
+        "source": "/api/chat/about-me",
+        "function": {
+          "functionId": "aboutMe",
+          "region": "us-central1"
+        }
+      },
+      {
+        "source": "/api/chat/about-user",
+        "function": {
+          "functionId": "aboutUser",
+          "region": "us-central1"
+        }
+      },
+      {
+        "source": "/api/chat/my-status-summary",
+        "function": {
+          "functionId": "myStatusSummary",
+          "region": "us-central1"
+        }
+      },
+      {
+        "source": "/api/chat/status-summary",
+        "function": {
+          "functionId": "statusSummary",
+          "region": "us-central1"
+        }
+      }
+    ]
+  },
+  "functions": {
+    "source": "functions"
   },
   "firestore": {
     "rules": "firestore.rules",
@@ -27,6 +60,14 @@
     "firestore": {
       "host": "localhost",
       "port": 8081
+    },
+    "functions": {
+      "host": "localhost",
+      "port": 5001
+    },
+    "hosting": {
+      "host": "localhost",
+      "port": 5002
     },
     "ui": {
       "enabled": true,

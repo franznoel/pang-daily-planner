@@ -1,5 +1,3 @@
-"use client";
-
 import { createTheme, Theme } from "@mui/material/styles";
 
 export type ThemeId = 
