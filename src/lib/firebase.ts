@@ -5,7 +5,10 @@ import { getFirestore, connectFirestoreEmulator, Firestore } from "firebase/fire
 import { getAuth, connectAuthEmulator, GoogleAuthProvider, Auth } from "firebase/auth";
 import { firebaseConfig } from "./firebase-config";
 
-const isDevelopment = process.env.APP_ENV !== "production";
+const useFirebaseEmulators =
+  process.env.NEXT_PUBLIC_USE_FIREBASE_EMULATORS === "true";
+const emulatorHost =
+  process.env.NEXT_PUBLIC_FIREBASE_EMULATOR_HOST || "127.0.0.1";
 
 // Track emulator connection status
 let firestoreEmulatorConnected = false;
@@ -27,8 +30,12 @@ function getFirestoreDb(): Firestore {
   if (!db) {
     db = getFirestore(getFirebaseApp());
     // Connect to emulator in development
-    if (typeof window !== "undefined" && isDevelopment && !firestoreEmulatorConnected) {
-      connectFirestoreEmulator(db, "localhost", 8081);
+    if (
+      typeof window !== "undefined" &&
+      useFirebaseEmulators &&
+      !firestoreEmulatorConnected
+    ) {
+      connectFirestoreEmulator(db, emulatorHost, 8081);
       firestoreEmulatorConnected = true;
     }
   }
@@ -39,8 +46,14 @@ function getFirebaseAuth(): Auth {
   if (!auth) {
     auth = getAuth(getFirebaseApp());
     // Connect to emulator in development
-    if (typeof window !== "undefined" && isDevelopment && !authEmulatorConnected) {
-      connectAuthEmulator(auth, "http://localhost:9099", { disableWarnings: true });
+    if (
+      typeof window !== "undefined" &&
+      useFirebaseEmulators &&
+      !authEmulatorConnected
+    ) {
+      connectAuthEmulator(auth, `http://${emulatorHost}:9099`, {
+        disableWarnings: true,
+      });
       authEmulatorConnected = true;
     }
   }

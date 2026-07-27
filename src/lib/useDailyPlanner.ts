@@ -7,6 +7,7 @@ import {
   getDailyPlan,
   saveDailyPlan,
   getMostRecentDailyPlan,
+  getDatesWithPlans,
   DailyPlannerDocument,
   extractIncompleteHabits,
   extractIncompletePriorities,
@@ -268,15 +269,16 @@ export function useDailyPlanner(): UseDailyPlannerReturn {
   useEffect(() => {
     const initializeData = async () => {
       if (!user) {
+        setDatesWithPlans([]);
         setLoading(false);
         return;
       }
 
       if (isInitialLoad.current) {
         isInitialLoad.current = false;
-        const today = dayjs();
-        await changeDate(today);
-        // loadDatesWithPlans is already called inside changeDate after saving
+        const existingDates = await getDatesWithPlans(user.uid);
+        setDatesWithPlans(existingDates);
+        await changeDate(dayjs());
       }
     };
     
