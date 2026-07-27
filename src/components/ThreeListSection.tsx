@@ -8,8 +8,8 @@ interface ListColumnProps {
 }
 
 const ListColumn: React.FC<ListColumnProps> = ({ title, values, onChange }) => (
-  <Stack spacing={1}>
-    <Typography fontWeight={600}>{title}</Typography>
+  <Stack spacing={0.75} sx={{ p: 1.5, bgcolor: "action.hover", borderRadius: 2 }}>
+    <Typography fontWeight={700} fontSize="0.82rem" color="text.secondary">{title}</Typography>
     {values.map((value, index) => (
       <TextField
         key={index}
@@ -40,7 +40,7 @@ const ThreeListSection: React.FC<ThreeListSectionProps> = ({
   onPeopleToSeeChange,
 }) => {
   return (
-    <Grid container spacing={3} sx={{ mt: 3 }}>
+    <Grid container spacing={1.5} sx={{ mt: 2 }}>
       <Grid size={{ xs: 12, md: 4 }}>
         <ListColumn
           title="I am grateful for"

@@ -212,14 +212,56 @@ const defaultMuiTheme = createTheme({
   palette: {
     mode: "light",
     primary: {
-      main: "#1976d2",
+      main: "#4f46e5",
     },
     secondary: {
-      main: "#9c27b0",
+      main: "#0f766e",
+    },
+    background: {
+      default: "#f4f5f8",
+      paper: "#ffffff",
     },
   },
+  shape: { borderRadius: 12 },
   typography: {
     fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+    h4: { fontSize: "1.65rem", letterSpacing: "-0.035em" },
+    h5: { fontSize: "1.2rem", letterSpacing: "-0.02em" },
+    h6: { fontSize: "1rem", letterSpacing: "-0.01em" },
+    button: { textTransform: "none", fontWeight: 650 },
+  },
+  components: {
+    MuiCssBaseline: {
+      styleOverrides: {
+        body: { backgroundImage: "radial-gradient(circle at 12% 0%, rgba(79,70,229,.08), transparent 28%)" },
+      },
+    },
+    MuiAppBar: {
+      styleOverrides: {
+        root: {
+          background: "rgba(255,255,255,.82)",
+          color: "#18181b",
+          boxShadow: "none",
+          borderBottom: "1px solid rgba(24,24,27,.08)",
+          backdropFilter: "blur(14px)",
+        },
+      },
+    },
+    MuiToolbar: { styleOverrides: { root: { minHeight: 56 } } },
+    MuiButton: { defaultProps: { disableElevation: true } },
+    MuiTextField: { defaultProps: { size: "small" } },
+    MuiFormControl: { defaultProps: { size: "small" } },
+    MuiOutlinedInput: {
+      styleOverrides: {
+        root: {
+          backgroundColor: "rgba(255,255,255,.72)",
+          "& .MuiOutlinedInput-notchedOutline": { borderColor: "rgba(24,24,27,.13)" },
+          "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "rgba(79,70,229,.45)" },
+        },
+        input: { paddingTop: 9, paddingBottom: 9 },
+      },
+    },
+    MuiCheckbox: { defaultProps: { size: "small" } },
   },
 });
 

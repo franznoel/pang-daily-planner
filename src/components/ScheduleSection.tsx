@@ -149,18 +149,18 @@ const ScheduleSection: React.FC<ScheduleSectionProps> = ({
   };
 
   return (
-    <Box>
+    <Box sx={{ p: 1.5, border: "1px solid", borderColor: "divider", borderRadius: 2 }}>
       <Typography variant="h6" fontWeight={600} gutterBottom>
         Schedule
       </Typography>
-      <Box sx={{ height: 800 }}>
+      <Box sx={{ height: { xs: 560, md: 650 } }}>
         <FullCalendar
           ref={calendarRef}
           plugins={[timeGridPlugin, interactionPlugin]}
           initialView="timeGridDay"
           initialDate={currentDate}
           headerToolbar={false}
-          slotMinTime="03:00:00"
+          slotMinTime="05:00:00"
           slotMaxTime="23:00:00"
           allDaySlot={false}
           selectable={true}

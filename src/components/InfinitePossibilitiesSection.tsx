@@ -9,12 +9,12 @@ interface InfinitePossibilitiesSectionProps {
 const InfinitePossibilitiesSection: React.FC<
   InfinitePossibilitiesSectionProps
 > = ({ infinitePossibilities, onInfinitePossibilitiesChange }) => (
-  <Box sx={{ mt: 5 }}>
-    <Typography fontWeight={600}>Space for Infinite Possibilities:</Typography>
+  <Box sx={{ mt: 2, p: 1.5, bgcolor: "action.hover", borderRadius: 2 }}>
+    <Typography fontWeight={700} fontSize="0.82rem" color="text.secondary">Space for infinite possibilities</Typography>
     <TextField
       fullWidth
       multiline
-      rows={3}
+      rows={2}
       sx={{ mt: 1 }}
       value={infinitePossibilities}
       onChange={(e) => onInfinitePossibilitiesChange(e.target.value)}

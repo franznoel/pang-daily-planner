@@ -15,10 +15,10 @@ const HabitColumn: React.FC<HabitColumnProps> = ({
   onTextChange,
   onCheckedChange,
 }) => (
-  <Stack spacing={1}>
-    <Typography fontWeight={600}>{title}</Typography>
+  <Stack spacing={0.5} sx={{ p: 1.25, border: "1px solid", borderColor: "divider", borderRadius: 2 }}>
+    <Typography fontWeight={700} fontSize="0.82rem" color="text.secondary">{title}</Typography>
     {habits.map((habit, index) => (
-      <Stack direction="row" spacing={1} alignItems="center" key={index}>
+      <Stack direction="row" spacing={0.25} alignItems="center" key={index}>
         <Checkbox
           checked={habit.checked}
           onChange={(e) => onCheckedChange(index, e.target.checked)}
@@ -57,9 +57,9 @@ const HabitsSection: React.FC<HabitsSectionProps> = ({
   onSpiritHabitTextChange,
   onSpiritHabitCheckedChange,
 }) => (
-  <Grid container spacing={3}>
+  <Grid container spacing={1.5}>
     <Grid size={12}>
-      <Typography textAlign="center" variant="h6">
+      <Typography textAlign="left" variant="h6" fontWeight={750}>
         Daily Habits
       </Typography>
     </Grid>

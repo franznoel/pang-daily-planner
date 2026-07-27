@@ -14,11 +14,12 @@ const MealsWaterSection: React.FC<MealsWaterSectionProps> = ({
   onMealsChange,
   onWaterChange,
 }) => (
-  <Stack spacing={2} sx={{ mt: 3 }}>
+  <Stack spacing={1} sx={{ p: 1.5, height: "100%", bgcolor: "action.hover", borderRadius: 2 }}>
     <TextField
       label="Meals"
       fullWidth
       multiline
+      minRows={1}
       value={meals}
       onChange={(e) => onMealsChange(e.target.value)}
     />

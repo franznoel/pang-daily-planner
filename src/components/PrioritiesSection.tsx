@@ -15,10 +15,10 @@ const BoxList: React.FC<BoxListProps> = ({
   onTextChange,
   onCheckedChange,
 }) => (
-  <Stack spacing={1} sx={{ mt: 2 }}>
-    <Typography fontWeight={600}>{title}</Typography>
+  <Stack spacing={0.5}>
+    <Typography fontWeight={700} fontSize="0.78rem" color="text.secondary">{title}</Typography>
     {priorities.map((priority, index) => (
-      <Stack direction="row" alignItems="center" spacing={1} key={index}>
+      <Stack direction="row" alignItems="center" spacing={0.25} key={index}>
         <Checkbox
           checked={priority.checked}
           onChange={(e) => onCheckedChange(index, e.target.checked)}
@@ -57,7 +57,7 @@ const PrioritiesSection: React.FC<PrioritiesSectionProps> = ({
   onPersonalPriorityTextChange,
   onPersonalPriorityCheckedChange,
 }) => (
-  <Stack>
+  <Stack spacing={1.5} sx={{ p: 1.5, border: "1px solid", borderColor: "divider", borderRadius: 2 }}>
     <BoxList
       title="Top Priorities"
       priorities={topPriorities}

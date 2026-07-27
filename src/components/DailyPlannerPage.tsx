@@ -108,7 +108,19 @@ const DailyPlannerPage: React.FC = () => {
   }
 
   return (
-    <Card sx={{ p: 4, maxWidth: 1200, margin: "auto", mt: 4, mb: 7 }}>
+    <Card
+      elevation={0}
+      sx={{
+        p: { xs: 1.5, sm: 2, md: 2.5 },
+        maxWidth: 1240,
+        mx: "auto",
+        my: { xs: 1.5, md: 2.5 },
+        border: "1px solid",
+        borderColor: "divider",
+        borderRadius: { xs: 2, md: 3 },
+        bgcolor: "background.paper",
+      }}
+    >
       <HeaderSection
         date={state.date}
         energyLevel={state.energyLevel}
@@ -136,7 +148,7 @@ const DailyPlannerPage: React.FC = () => {
         }
       />
 
-      <Divider sx={{ my: 3 }} />
+      <Divider sx={{ my: 2 }} />
 
       <HabitsSection
         mindHabits={state.mindHabits}
@@ -162,24 +174,30 @@ const DailyPlannerPage: React.FC = () => {
         }
       />
 
-      <MealsWaterSection
-        meals={state.meals}
-        water={state.water}
-        onMealsChange={(value) => updateField("meals", value)}
-        onWaterChange={(value) => updateField("water", value)}
-      />
+      <Grid container spacing={1.5} sx={{ mt: 2 }}>
+        <Grid size={{ xs: 12, md: 5 }}>
+          <MealsWaterSection
+            meals={state.meals}
+            water={state.water}
+            onMealsChange={(value) => updateField("meals", value)}
+            onWaterChange={(value) => updateField("water", value)}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 3.5 }}>
+          <IntentionSection
+            intention={state.intention}
+            onIntentionChange={(value) => updateField("intention", value)}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 3.5 }}>
+          <IAmSection
+            iAm={state.iAm}
+            onIAmChange={(value) => updateField("iAm", value)}
+          />
+        </Grid>
+      </Grid>
 
-      <IntentionSection
-        intention={state.intention}
-        onIntentionChange={(value) => updateField("intention", value)}
-      />
-
-      <IAmSection
-        iAm={state.iAm}
-        onIAmChange={(value) => updateField("iAm", value)}
-      />
-
-      <Grid container spacing={3} sx={{ mt: 3 }}>
+      <Grid container spacing={2} sx={{ mt: 2 }}>
         <Grid size={{ xs: 12, md: 8 }}>
           <ScheduleSection
             scheduleEvents={state.scheduleEvents}
@@ -223,7 +241,7 @@ const DailyPlannerPage: React.FC = () => {
         }
       />
 
-      <Divider sx={{ my: 5 }} />
+      <Divider sx={{ my: 3 }} />
 
       <EndOfDayReflection
         whatInspiredMe={state.whatInspiredMe}

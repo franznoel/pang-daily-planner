@@ -78,8 +78,8 @@ export default function AppBar({ title = "Daily Planner", showHomeLink = false }
 
   return (
     <>
-      <MuiAppBar position="static">
-        <Toolbar>
+      <MuiAppBar position="sticky" elevation={0}>
+        <Toolbar sx={{ maxWidth: 1280, width: "100%", mx: "auto", px: { xs: 2, md: 3 } }}>
           {showHomeLink && (
             <IconButton
               color="inherit"
@@ -90,8 +90,8 @@ export default function AppBar({ title = "Daily Planner", showHomeLink = false }
               <HomeIcon />
             </IconButton>
           )}
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            {title}
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontWeight: 750, letterSpacing: "-0.025em" }}>
+            Pang <Box component="span" sx={{ color: "text.secondary", fontWeight: 500 }}>· {title}</Box>
           </Typography>
           {user && (
             <Box sx={{ display: "flex", alignItems: "center" }}>
@@ -106,7 +106,7 @@ export default function AppBar({ title = "Daily Planner", showHomeLink = false }
                 <Avatar
                   src={user.photoURL || undefined}
                   alt={user.displayName || user.email || "User"}
-                  sx={{ width: 36, height: 36, bgcolor: "secondary.main" }}
+                  sx={{ width: 32, height: 32, bgcolor: "secondary.main", fontSize: 14 }}
                 >
                   {getAvatarLetter()}
                 </Avatar>

@@ -10,11 +10,12 @@ const IntentionSection: React.FC<IntentionSectionProps> = ({
   intention,
   onIntentionChange,
 }) => (
-  <Box sx={{ mt: 3 }}>
-    <Typography fontWeight={600}>Today&apos;s Intention:</Typography>
+  <Box sx={{ p: 1.5, height: "100%", bgcolor: "action.hover", borderRadius: 2 }}>
+    <Typography fontWeight={700} fontSize="0.82rem" color="text.secondary">Today&apos;s intention</Typography>
     <TextField
       fullWidth
       multiline
+      minRows={3}
       sx={{ mt: 1 }}
       value={intention}
       onChange={(e) => onIntentionChange(e.target.value)}

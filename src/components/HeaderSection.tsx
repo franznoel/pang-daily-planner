@@ -74,11 +74,11 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
   };
 
   return (
-    <Box>
+    <Box sx={{ pb: 2, borderBottom: "1px solid", borderColor: "divider" }}>
       <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={2}>
         <Stack direction="row" alignItems="center" spacing={2}>
-          <Typography variant="h4" fontWeight={600} gutterBottom>
-            Daily Planner
+          <Typography variant="h4" fontWeight={750}>
+            Plan your day
           </Typography>
           {(loading || saving) && (
             <CircularProgress size={20} sx={{ mb: 1 }} />
@@ -99,14 +99,14 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
         </Button>
       </Stack>
 
-      <Stack direction="row" spacing={3} alignItems="flex-start">
+      <Stack direction={{ xs: "column", sm: "row" }} spacing={1.25} sx={{ mt: 1.5 }} alignItems={{ xs: "stretch", sm: "center" }}>
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <DatePicker
             label="Date"
             value={date}
             onChange={onDateChange}
             format="MMMM D, YYYY"
-            slotProps={{ textField: { size: "small" } }}
+            slotProps={{ textField: { size: "small", sx: { width: { xs: "100%", sm: 210 } } } }}
             slots={{
               day: (dayProps) => (
                 <CustomDay {...dayProps} datesWithPlansSet={datesWithPlansSet} />
@@ -114,7 +114,7 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
             }}
           />
         </LocalizationProvider>
-        <FormControl size="small" sx={{ width: "200px" }}>
+        <FormControl size="small" sx={{ width: { xs: "100%", sm: 170 } }}>
           <InputLabel id="energy-level-label">Energy Level (1–10)</InputLabel>
           <Select
             labelId="energy-level-label"
@@ -133,6 +133,7 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
         <TextField
           label="Mood"
           size="small"
+          sx={{ width: { xs: "100%", sm: 180 } }}
           value={mood}
           onChange={(e) => onMoodChange(e.target.value)}
         />
