@@ -259,7 +259,7 @@ function SharedPlanViewContent() {
             <Button
               variant="contained"
               startIcon={<ChatIcon />}
-              onClick={() => router.push(`/view/${userId}/status`)}
+              onClick={() => router.push(`/view/${userId}/chat`)}
               sx={{ ml: 2 }}
             >
               Chat with AI

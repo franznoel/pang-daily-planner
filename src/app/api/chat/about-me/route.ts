@@ -3,6 +3,14 @@ import OpenAI from "openai";
 import { adminDb } from "@/lib/firebase-admin";
 import { DailyPlannerDocument } from "@/lib/dailyPlannerService";
 import { formatPlansForAI, getOpenAIApiKey } from "@/lib/ai-utils";
+import {
+  authenticateChatRequest,
+  chatErrorResponse,
+  ChatRequestError,
+  readChatRequestBody,
+  validateChatMessage,
+  validateConversationHistory,
+} from "@/lib/chat-server";
 
 // Set max duration to 60 seconds
 export const maxDuration = 60;
@@ -16,14 +24,13 @@ function getOpenAIClient() {
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId, message, conversationHistory } = await request.json();
-
-    if (!userId || !message) {
-      return NextResponse.json(
-        { error: "Missing required fields: userId and message" },
-        { status: 400 }
-      );
-    }
+    const authenticatedUser = await authenticateChatRequest(request);
+    const body = await readChatRequestBody(request);
+    const message = validateChatMessage(body.message);
+    const conversationHistory = validateConversationHistory(
+      body.conversationHistory
+    );
+    const userId = authenticatedUser.uid;
 
     // Get last 5 daily plans
     const plans = await getLast5Plans(userId);
@@ -35,10 +42,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (plans.length === 0) {
-      return NextResponse.json(
-        { error: "No daily plans found" },
-        { status: 404 }
-      );
+      throw new ChatRequestError("No daily plans found", 404);
     }
 
     // Get user info
@@ -69,9 +73,7 @@ Use this information to provide personalized advice, answer questions, and offer
     ];
 
     // Add conversation history if provided
-    if (conversationHistory && Array.isArray(conversationHistory)) {
-      messages.push(...conversationHistory);
-    }
+    messages.push(...conversationHistory);
 
     // Add the new user message
     messages.push({
@@ -95,11 +97,7 @@ Use this information to provide personalized advice, answer questions, and offer
       userName,
     });
   } catch (error) {
-    console.error("Error in chat about me:", error);
-    return NextResponse.json(
-      { error: "Failed to process chat message" },
-      { status: 500 }
-    );
+    return chatErrorResponse(error, "Failed to process chat message");
   }
 }
 

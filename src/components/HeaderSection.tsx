@@ -112,7 +112,7 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
         <Button
           variant="contained"
           startIcon={<ChatIcon />}
-          onClick={() => router.push("/status")}
+          onClick={() => router.push("/chat")}
           size="small"
         >
           Chat with AI
