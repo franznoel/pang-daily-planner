@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
-import { Box, TextField, Typography, Stack, CircularProgress, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent, Button } from "@mui/material";
+import { Autocomplete, Box, TextField, Typography, Stack, CircularProgress, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent, Button, InputAdornment } from "@mui/material";
 import ChatIcon from "@mui/icons-material/Chat";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -21,6 +21,26 @@ interface HeaderSectionProps {
   onEnergyLevelChange: (value: string) => void;
   onMoodChange: (value: string) => void;
 }
+
+interface MoodOption {
+  label: string;
+  emoji: string;
+}
+
+const moodOptions: MoodOption[] = [
+  { label: "Happy", emoji: "😊" },
+  { label: "Calm", emoji: "😌" },
+  { label: "Focused", emoji: "🎯" },
+  { label: "Energized", emoji: "⚡" },
+  { label: "Hopeful", emoji: "🌤️" },
+  { label: "Content", emoji: "🙂" },
+  { label: "Reflective", emoji: "🤔" },
+  { label: "Tired", emoji: "😴" },
+  { label: "Anxious", emoji: "😟" },
+  { label: "Overwhelmed", emoji: "😵‍💫" },
+  { label: "Frustrated", emoji: "😤" },
+  { label: "Sad", emoji: "😔" },
+];
 
 // Custom day component for DatePicker
 interface CustomDayProps extends PickersDayProps {
@@ -130,12 +150,51 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
             ))}
           </Select>
         </FormControl>
-        <TextField
-          label="Mood"
-          size="small"
+        <Autocomplete<MoodOption, false, false, true>
+          freeSolo
+          options={moodOptions}
+          inputValue={mood}
+          getOptionLabel={(option) =>
+            typeof option === "string" ? option : option.label
+          }
+          onInputChange={(_, value) => onMoodChange(value)}
+          renderOption={(props, option) => (
+            <Box component="li" {...props} sx={{ gap: 1 }}>
+              <Box component="span" aria-hidden sx={{ fontSize: "1.1rem" }}>
+                {option.emoji}
+              </Box>
+              {option.label}
+            </Box>
+          )}
           sx={{ width: { xs: "100%", sm: 180 } }}
-          value={mood}
-          onChange={(e) => onMoodChange(e.target.value)}
+          renderInput={(params) => {
+            const selectedMood = moodOptions.find(
+              (option) => option.label.toLowerCase() === mood.toLowerCase()
+            );
+
+            return (
+              <TextField
+                {...params}
+                label="Mood"
+                placeholder="Search moods"
+                slotProps={{
+                  input: {
+                    ...params.InputProps,
+                    startAdornment: (
+                      <>
+                        <InputAdornment position="start">
+                          <Box component="span" aria-hidden>
+                            {selectedMood?.emoji ?? "🙂"}
+                          </Box>
+                        </InputAdornment>
+                        {params.InputProps.startAdornment}
+                      </>
+                    ),
+                  },
+                }}
+              />
+            );
+          }}
         />
       </Stack>
     </Box>
