@@ -3,13 +3,11 @@
 import React, { createContext, useContext, useEffect, useRef, useState, ReactNode } from "react";
 import { User, onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth";
 import { getFirebaseAuth, getGoogleProvider } from "./firebase";
+import { useFirebaseEmulators } from "./firebase-config";
 import { ensureUserDocument } from "./dailyPlannerService";
 
 const AUTH_MODE_STORAGE_KEY = "pang-firebase-auth-mode";
-const firebaseAuthMode =
-  process.env.NEXT_PUBLIC_USE_FIREBASE_EMULATORS === "true"
-    ? "emulator"
-    : "cloud";
+const firebaseAuthMode = useFirebaseEmulators ? "emulator" : "cloud";
 
 interface AuthContextType {
   user: User | null;

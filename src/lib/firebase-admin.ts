@@ -1,13 +1,11 @@
 import * as admin from "firebase-admin";
 import { getApps } from "firebase-admin/app";
-import { firebaseConfig } from "./firebase-config";
+import { firebaseConfig, useFirebaseEmulators } from "./firebase-config";
 
-const useFirebaseEmulators =
-  process.env.NEXT_PUBLIC_USE_FIREBASE_EMULATORS === "true";
 const emulatorHost =
   process.env.NEXT_PUBLIC_FIREBASE_EMULATOR_HOST || "127.0.0.1";
 
-if (process.env.APP_ENV !== "production" && useFirebaseEmulators) {
+if (useFirebaseEmulators) {
   process.env.FIRESTORE_EMULATOR_HOST ||= `${emulatorHost}:8081`;
   process.env.FIREBASE_AUTH_EMULATOR_HOST ||= `${emulatorHost}:9099`;
 }

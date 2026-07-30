@@ -5,6 +5,13 @@
 
 const isDevelopment = process.env.NODE_ENV !== "production";
 
+// Emulator connections must be impossible in production builds. NEXT_PUBLIC_*
+// values are baked into the browser bundle at build time, so the environment
+// check protects deployments even if a build machine has a stale local flag.
+export const useFirebaseEmulators =
+  isDevelopment &&
+  process.env.NEXT_PUBLIC_USE_FIREBASE_EMULATORS === "true";
+
 // Demo values for development environment when using emulators
 const demoConfig = {
   apiKey: "demo-api-key",

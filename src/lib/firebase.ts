@@ -3,10 +3,8 @@ import "client-only";
 import { initializeApp, getApps, FirebaseApp } from "firebase/app";
 import { getFirestore, connectFirestoreEmulator, Firestore } from "firebase/firestore";
 import { getAuth, connectAuthEmulator, GoogleAuthProvider, Auth } from "firebase/auth";
-import { firebaseConfig } from "./firebase-config";
+import { firebaseConfig, useFirebaseEmulators } from "./firebase-config";
 
-const useFirebaseEmulators =
-  process.env.NEXT_PUBLIC_USE_FIREBASE_EMULATORS === "true";
 const emulatorHost =
   process.env.NEXT_PUBLIC_FIREBASE_EMULATOR_HOST || "127.0.0.1";
 
