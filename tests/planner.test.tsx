@@ -2,6 +2,7 @@ import React, { act } from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import { beforeEach, afterEach, expect, test, vi } from 'vitest';
 import dayjs from 'dayjs';
+import { page } from 'vitest/browser';
 import { useDailyPlanner, createEmptyState } from '../src/lib/useDailyPlanner';
 import ScheduleSection from '../src/components/ScheduleSection';
 import DailyPlannerPage from '../src/components/DailyPlannerPage';
@@ -35,7 +36,8 @@ async function mount() {
   await vi.waitFor(() => expect(planner.loading).toBe(false));
 }
 async function settle() { await act(async () => { await Promise.resolve(); }); }
-beforeEach(() => {
+beforeEach(async () => {
+  await page.viewport(390, 844);
   vi.clearAllMocks();
   vi.mocked(saveDailyPlan).mockResolvedValue(undefined);
   vi.mocked(getDailyPlan).mockResolvedValue(null);
@@ -127,5 +129,24 @@ test('mobile puts priorities and schedule before reflection and removes the AI b
   expect(top.getBoundingClientRect().top).toBeLessThan(schedule.getBoundingClientRect().top);
   expect(schedule.getBoundingClientRect().top).toBeLessThan(gratitude.getBoundingClientRect().top);
   expect(host.textContent).not.toContain('Chat with AI');
+  expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(window.innerWidth);
+});
+
+
+test.each([1024, 1280, 1440])('desktop at %ipx shows schedule and priorities side by side', async (width) => {
+  await page.viewport(width, 900);
+  await act(async () => root.render(<DailyPlannerPage />));
+  await vi.waitFor(() => expect(host.textContent).toContain('Top Priorities'));
+  const priorities = [...host.querySelectorAll('*')].find(el => el.textContent === 'Top Priorities')!;
+  const schedule = [...host.querySelectorAll('*')].find(el => el.textContent === 'Schedule')!;
+  const priorityColumn = priorities.closest('.MuiGrid-root')!;
+  const scheduleColumn = schedule.closest('.MuiGrid-root')!;
+  const priorityBounds = priorityColumn.getBoundingClientRect();
+  const scheduleBounds = scheduleColumn.getBoundingClientRect();
+  expect(Math.abs(priorityBounds.top - scheduleBounds.top)).toBeLessThan(1);
+  expect(scheduleBounds.right).toBeLessThanOrEqual(priorityBounds.left);
+  expect(scheduleBounds.width).toBeGreaterThan(priorityBounds.width * 1.9);
+  expect(priorityColumn.parentElement).toBe(scheduleColumn.parentElement);
+  expect(scheduleBounds.width + priorityBounds.width).toBeGreaterThan(priorityColumn.parentElement!.getBoundingClientRect().width * 0.95);
   expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(window.innerWidth);
 });

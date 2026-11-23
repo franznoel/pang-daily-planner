@@ -175,7 +175,8 @@ const DailyPlannerPage: React.FC = () => {
               updatePriorityChecked("personalPriorities", index, checked)
             }
           />
-          <Grid size={{ xs: 12, md: 8 }} sx={{ order: { xs: 2, md: 1 } }}>
+        </Grid>
+        <Grid size={{ xs: 12, md: 8 }} sx={{ order: { xs: 2, md: 1 } }}>
           <ScheduleSection
             scheduleEvents={state.scheduleEvents}
             currentDate={state.date?.format("YYYY-MM-DD") || new Date().toISOString().split("T")[0]}
@@ -184,7 +185,6 @@ const DailyPlannerPage: React.FC = () => {
             onEventDelete={deleteScheduleEvent}
           />
         </Grid>
-      </Grid>
       </Grid>
 
       <Box sx={{ order: { xs: 2, md: 1 } }}>
