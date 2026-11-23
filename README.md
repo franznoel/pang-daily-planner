@@ -125,3 +125,14 @@ NEXT_PUBLIC_GRAPHQL_URL=/api/graphql
 - [Apollo Client Documentation](https://www.apollographql.com/docs/react/)
 - [Storybook Documentation](https://storybook.js.org/docs)
 - [Firebase Hosting Documentation](https://firebase.google.com/docs/hosting)
+
+
+## Google Analytics
+
+Production uses the existing `pang-daily-planner` GA4 web stream (`G-YSWXDLP329`) in property `514586712`, linked to Firebase. Set `NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID` in the build environment (the legacy `NEXT_PUBLIC_MEASUREMENT_ID` is also accepted).
+
+Tracking loads after hydration only on `pang-daily-planner.web.app` and `pang-daily-planner.firebaseapp.com` in production. Development and preview hosts are excluded. Page views include initial loads and client-side navigation. URLs exclude query strings, fragments, and shared-user IDs; planner entries and account details are not included in events.
+
+Keep Enhanced Measurement **off** for this stream. The app sends page views explicitly; automatic history tracking would duplicate them. Google signals and advertising personalization are disabled in the tag configuration.
+
+View collection in [Google Analytics Realtime](https://analytics.google.com/analytics/web/#/p514586712/reports/realtime) or in the Firebase Analytics dashboard.

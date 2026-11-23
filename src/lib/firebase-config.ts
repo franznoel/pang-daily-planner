@@ -32,5 +32,5 @@ export const firebaseConfig = {
   storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || (isDevelopment ? demoConfig.storageBucket : ""),
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || (isDevelopment ? demoConfig.messagingSenderId : ""),
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || (isDevelopment ? demoConfig.appId : ""),
-  measurementId: process.env.NEXT_PUBLIC_MEASUREMENT_ID || (isDevelopment ? demoConfig.measurementId : ""),
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID || process.env.NEXT_PUBLIC_MEASUREMENT_ID || (isDevelopment ? demoConfig.measurementId : ""),
 };

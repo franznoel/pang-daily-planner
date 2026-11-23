@@ -3,6 +3,7 @@ import { ThemeRegistry } from "@/lib/ThemeRegistry";
 import { ApolloWrapper } from "@/lib/ApolloWrapper";
 import { AuthProvider } from "@/lib/AuthContext";
 import "./globals.css";
+import GoogleAnalytics from "@/components/GoogleAnalytics";
 
 export const metadata: Metadata = {
   title: "Pang Daily Planner",
@@ -17,6 +18,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
+        <GoogleAnalytics />
         <ApolloWrapper>
           <ThemeRegistry>
             <AuthProvider>{children}</AuthProvider>
