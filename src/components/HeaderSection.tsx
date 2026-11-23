@@ -1,9 +1,7 @@
 "use client";
 
 import React from "react";
-import { useRouter } from "next/navigation";
-import { Autocomplete, Box, TextField, Typography, Stack, CircularProgress, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent, Button, InputAdornment } from "@mui/material";
-import ChatIcon from "@mui/icons-material/Chat";
+import { Autocomplete, Box, TextField, Typography, Stack, CircularProgress, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent, InputAdornment } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -81,7 +79,6 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
   onEnergyLevelChange,
   onMoodChange,
 }) => {
-  const router = useRouter();
   
   // Convert array to Set for O(1) lookups in DatePicker
   const datesWithPlansSet = React.useMemo(
@@ -109,14 +106,7 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
             </Typography>
           )}
         </Stack>
-        <Button
-          variant="contained"
-          startIcon={<ChatIcon />}
-          onClick={() => router.push("/chat")}
-          size="small"
-        >
-          Chat with AI
-        </Button>
+
       </Stack>
 
       <Stack direction={{ xs: "column", sm: "row" }} spacing={1.25} sx={{ mt: 1.5 }} alignItems={{ xs: "stretch", sm: "center" }}>

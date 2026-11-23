@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Grid, Divider, Card, CircularProgress, Box } from "@mui/material";
+import { Grid, Divider, Card, CircularProgress, Box, Alert, Button, Typography } from "@mui/material";
 
 import HeaderSection from "./HeaderSection";
 import ThreeListSection from "./ThreeListSection";
@@ -19,7 +19,7 @@ import { useDailyPlanner } from "@/lib/useDailyPlanner";
 export type { HabitItem, PriorityItem, DailyPlannerState, ScheduleEvent };
 
 const DailyPlannerPage: React.FC = () => {
-  const { state, loading, saving, datesWithPlans, updateField, changeDate } =
+  const { state, loading, saving, pending, saveError, retrySave, loadError, retryLoad, datesWithPlans, updateField, changeDate } =
     useDailyPlanner();
 
   const updateListItem = (
@@ -107,10 +107,16 @@ const DailyPlannerPage: React.FC = () => {
     );
   }
 
+  if (loadError) {
+    return <Alert severity="error" action={<Button onClick={retryLoad}>Retry</Button>}>{loadError}</Alert>;
+  }
+
   return (
     <Card
       elevation={0}
       sx={{
+        display: "flex",
+        flexDirection: "column",
         p: { xs: 1.5, sm: 2, md: 2.5 },
         maxWidth: 1240,
         mx: "auto",
@@ -121,6 +127,17 @@ const DailyPlannerPage: React.FC = () => {
         bgcolor: "background.paper",
       }}
     >
+      <Box role="status" aria-live="polite" sx={{ mb: 1 }}>
+        {saveError ? (
+          <Alert severity="warning" action={<Button color="inherit" onClick={retrySave}>Retry</Button>}>
+            {saveError}
+          </Alert>
+        ) : (
+          <Typography variant="caption" color="text.secondary">
+            {saving ? "Saving…" : pending ? "Changes waiting to save…" : "All changes saved"}
+          </Typography>
+        )}
+      </Box>
       <HeaderSection
         date={state.date}
         energyLevel={state.energyLevel}
@@ -133,81 +150,8 @@ const DailyPlannerPage: React.FC = () => {
         onMoodChange={(value) => updateField("mood", value)}
       />
 
-      <ThreeListSection
-        gratefulFor={state.gratefulFor}
-        excitedAbout={state.excitedAbout}
-        peopleToSee={state.peopleToSee}
-        onGratefulForChange={(index, value) =>
-          updateListItem("gratefulFor", index, value)
-        }
-        onExcitedAboutChange={(index, value) =>
-          updateListItem("excitedAbout", index, value)
-        }
-        onPeopleToSeeChange={(index, value) =>
-          updateListItem("peopleToSee", index, value)
-        }
-      />
-
-      <Divider sx={{ my: 2 }} />
-
-      <HabitsSection
-        mindHabits={state.mindHabits}
-        bodyHabits={state.bodyHabits}
-        spiritHabits={state.spiritHabits}
-        onMindHabitTextChange={(index, text) =>
-          updateHabitText("mindHabits", index, text)
-        }
-        onMindHabitCheckedChange={(index, checked) =>
-          updateHabitChecked("mindHabits", index, checked)
-        }
-        onBodyHabitTextChange={(index, text) =>
-          updateHabitText("bodyHabits", index, text)
-        }
-        onBodyHabitCheckedChange={(index, checked) =>
-          updateHabitChecked("bodyHabits", index, checked)
-        }
-        onSpiritHabitTextChange={(index, text) =>
-          updateHabitText("spiritHabits", index, text)
-        }
-        onSpiritHabitCheckedChange={(index, checked) =>
-          updateHabitChecked("spiritHabits", index, checked)
-        }
-      />
-
-      <Grid container spacing={1.5} sx={{ mt: 2 }}>
-        <Grid size={{ xs: 12, md: 5 }}>
-          <MealsWaterSection
-            meals={state.meals}
-            water={state.water}
-            onMealsChange={(value) => updateField("meals", value)}
-            onWaterChange={(value) => updateField("water", value)}
-          />
-        </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 3.5 }}>
-          <IntentionSection
-            intention={state.intention}
-            onIntentionChange={(value) => updateField("intention", value)}
-          />
-        </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 3.5 }}>
-          <IAmSection
-            iAm={state.iAm}
-            onIAmChange={(value) => updateField("iAm", value)}
-          />
-        </Grid>
-      </Grid>
-
-      <Grid container spacing={2} sx={{ mt: 2 }}>
-        <Grid size={{ xs: 12, md: 8 }}>
-          <ScheduleSection
-            scheduleEvents={state.scheduleEvents}
-            currentDate={state.date?.format("YYYY-MM-DD") || new Date().toISOString().split("T")[0]}
-            onEventAdd={addScheduleEvent}
-            onEventUpdate={updateScheduleEvent}
-            onEventDelete={deleteScheduleEvent}
-          />
-        </Grid>
-        <Grid size={{ xs: 12, md: 4 }}>
+      <Grid container spacing={2} sx={{ mt: 2, order: { xs: 1, md: 3 } }}>
+        <Grid size={{ xs: 12, md: 4 }} sx={{ order: { xs: 1, md: 2 } }}>
           <PrioritiesSection
             topPriorities={state.topPriorities}
             professionalPriorities={state.professionalPriorities}
@@ -231,30 +175,109 @@ const DailyPlannerPage: React.FC = () => {
               updatePriorityChecked("personalPriorities", index, checked)
             }
           />
+          <Grid size={{ xs: 12, md: 8 }} sx={{ order: { xs: 2, md: 1 } }}>
+          <ScheduleSection
+            scheduleEvents={state.scheduleEvents}
+            currentDate={state.date?.format("YYYY-MM-DD") || new Date().toISOString().split("T")[0]}
+            onEventAdd={addScheduleEvent}
+            onEventUpdate={updateScheduleEvent}
+            onEventDelete={deleteScheduleEvent}
+          />
         </Grid>
       </Grid>
+      </Grid>
 
-      <InfinitePossibilitiesSection
-        infinitePossibilities={state.infinitePossibilities}
-        onInfinitePossibilitiesChange={(value) =>
-          updateField("infinitePossibilities", value)
-        }
-      />
+      <Box sx={{ order: { xs: 2, md: 1 } }}>
+        <ThreeListSection
+          gratefulFor={state.gratefulFor}
+          excitedAbout={state.excitedAbout}
+          peopleToSee={state.peopleToSee}
+          onGratefulForChange={(index, value) =>
+            updateListItem("gratefulFor", index, value)
+          }
+          onExcitedAboutChange={(index, value) =>
+            updateListItem("excitedAbout", index, value)
+          }
+          onPeopleToSeeChange={(index, value) =>
+            updateListItem("peopleToSee", index, value)
+          }
+        />
 
-      <Divider sx={{ my: 3 }} />
+        <Divider sx={{ my: 2 }} />
 
-      <EndOfDayReflection
-        whatInspiredMe={state.whatInspiredMe}
-        positiveThings={state.positiveThings}
-        whatDidIDoWell={state.whatDidIDoWell}
-        whatDidILearn={state.whatDidILearn}
-        onWhatInspiredMeChange={(value) => updateField("whatInspiredMe", value)}
-        onPositiveThingsChange={(index, value) =>
-          updateListItem("positiveThings", index, value)
-        }
-        onWhatDidIDoWellChange={(value) => updateField("whatDidIDoWell", value)}
-        onWhatDidILearnChange={(value) => updateField("whatDidILearn", value)}
-      />
+        <HabitsSection
+          mindHabits={state.mindHabits}
+          bodyHabits={state.bodyHabits}
+          spiritHabits={state.spiritHabits}
+          onMindHabitTextChange={(index, text) =>
+            updateHabitText("mindHabits", index, text)
+          }
+          onMindHabitCheckedChange={(index, checked) =>
+            updateHabitChecked("mindHabits", index, checked)
+          }
+          onBodyHabitTextChange={(index, text) =>
+            updateHabitText("bodyHabits", index, text)
+          }
+          onBodyHabitCheckedChange={(index, checked) =>
+            updateHabitChecked("bodyHabits", index, checked)
+          }
+          onSpiritHabitTextChange={(index, text) =>
+            updateHabitText("spiritHabits", index, text)
+          }
+          onSpiritHabitCheckedChange={(index, checked) =>
+            updateHabitChecked("spiritHabits", index, checked)
+          }
+        />
+
+      </Box>
+      <Box sx={{ order: { xs: 3, md: 2 } }}>
+        <Grid container spacing={1.5} sx={{ mt: 2 }}>
+          <Grid size={{ xs: 12, md: 5 }}>
+            <MealsWaterSection
+              meals={state.meals}
+              water={state.water}
+              onMealsChange={(value) => updateField("meals", value)}
+              onWaterChange={(value) => updateField("water", value)}
+            />
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6, md: 3.5 }}>
+            <IntentionSection
+              intention={state.intention}
+              onIntentionChange={(value) => updateField("intention", value)}
+            />
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6, md: 3.5 }}>
+            <IAmSection
+              iAm={state.iAm}
+              onIAmChange={(value) => updateField("iAm", value)}
+            />
+          </Grid>
+        </Grid>
+
+      </Box>
+      <Box sx={{ order: 4 }}>
+        <InfinitePossibilitiesSection
+          infinitePossibilities={state.infinitePossibilities}
+          onInfinitePossibilitiesChange={(value) =>
+            updateField("infinitePossibilities", value)
+          }
+        />
+
+        <Divider sx={{ my: 3 }} />
+
+        <EndOfDayReflection
+          whatInspiredMe={state.whatInspiredMe}
+          positiveThings={state.positiveThings}
+          whatDidIDoWell={state.whatDidIDoWell}
+          whatDidILearn={state.whatDidILearn}
+          onWhatInspiredMeChange={(value) => updateField("whatInspiredMe", value)}
+          onPositiveThingsChange={(index, value) =>
+            updateListItem("positiveThings", index, value)
+          }
+          onWhatDidIDoWellChange={(value) => updateField("whatDidIDoWell", value)}
+          onWhatDidILearnChange={(value) => updateField("whatDidILearn", value)}
+        />
+      </Box>
     </Card>
   );
 };

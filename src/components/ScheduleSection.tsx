@@ -11,6 +11,7 @@ import {
   Button,
   TextField,
   Stack,
+  Alert,
 } from "@mui/material";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -19,8 +20,9 @@ import dayjs, { Dayjs } from "dayjs";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin, { DateClickArg } from "@fullcalendar/interaction";
-import { EventClickArg, DateSelectArg } from "@fullcalendar/core";
+import { EventClickArg, DateSelectArg, EventChangeArg } from "@fullcalendar/core";
 import { ScheduleEvent } from "./types";
+import { isValidEventRange } from "@/lib/scheduleValidation";
 
 interface EventDialogData {
   id?: string;
@@ -119,14 +121,30 @@ const ScheduleSection: React.FC<ScheduleSectionProps> = ({
     });
   };
 
+  const validTimes = isValidEventRange(eventData.startTime, eventData.endTime, currentDate);
+
+  const handleCalendarChange = ({ event, revert }: EventChangeArg) => {
+    const previous = scheduleEvents.find(item => item.id === event.id);
+    if (!previous || !event.start || !event.end
+      || !isValidEventRange(dayjs(event.start), dayjs(event.end), currentDate)) {
+      revert();
+      return;
+    }
+    onEventUpdate({
+      ...previous,
+      start: dayjs(event.start).format("YYYY-MM-DDTHH:mm:ss"),
+      end: dayjs(event.end).format("YYYY-MM-DDTHH:mm:ss"),
+    });
+  };
+
   const handleSaveEvent = () => {
-    if (!eventData.eventName || !eventData.startTime || !eventData.endTime) {
+    if (!eventData.eventName.trim() || !validTimes || !eventData.startTime || !eventData.endTime) {
       return;
     }
 
     const newEvent: ScheduleEvent = {
       id: eventData.id || String(Date.now()),
-      title: eventData.eventName,
+      title: eventData.eventName.trim(),
       start: eventData.startTime.format("YYYY-MM-DDTHH:mm:ss"),
       end: eventData.endTime.format("YYYY-MM-DDTHH:mm:ss"),
       description: eventData.description,
@@ -150,9 +168,14 @@ const ScheduleSection: React.FC<ScheduleSectionProps> = ({
 
   return (
     <Box sx={{ p: 1.5, border: "1px solid", borderColor: "divider", borderRadius: 2 }}>
-      <Typography variant="h6" fontWeight={600} gutterBottom>
-        Schedule
-      </Typography>
+      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+        <Typography variant="h6" fontWeight={600}>Schedule</Typography>
+        <Button onClick={() => {
+          setIsEditMode(false);
+          setEventData({ eventName: "", startTime: dayjs(currentDate).hour(9), endTime: dayjs(currentDate).hour(10), description: "" });
+          setDialogOpen(true);
+        }}>Add event</Button>
+      </Stack>
       <Box sx={{ height: { xs: 560, md: 650 } }}>
         <FullCalendar
           ref={calendarRef}
@@ -169,6 +192,7 @@ const ScheduleSection: React.FC<ScheduleSectionProps> = ({
           events={scheduleEvents}
           select={handleDateSelect}
           eventClick={handleEventClick}
+          eventChange={handleCalendarChange}
           dateClick={handleDateClick}
           height="100%"
         />
@@ -201,6 +225,9 @@ const ScheduleSection: React.FC<ScheduleSectionProps> = ({
                   setEventData({ ...eventData, endTime: newValue })
                 }
               />
+              {eventData.startTime && eventData.endTime && !validTimes && (
+                <Alert severity="error">Choose valid times on this day, with the end after the start.</Alert>
+              )}
               <TextField
                 label="Description"
                 fullWidth
@@ -224,7 +251,7 @@ const ScheduleSection: React.FC<ScheduleSectionProps> = ({
           <Button
             onClick={handleSaveEvent}
             variant="contained"
-            disabled={!eventData.eventName || !eventData.startTime || !eventData.endTime}
+            disabled={!eventData.eventName.trim() || !validTimes}
           >
             {isEditMode ? "Save" : "Add"}
           </Button>

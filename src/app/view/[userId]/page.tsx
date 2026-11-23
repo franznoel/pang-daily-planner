@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import {
   Box,
   Card,
@@ -10,9 +10,7 @@ import {
   Alert,
   Divider,
   Grid,
-  Button,
 } from "@mui/material";
-import ChatIcon from "@mui/icons-material/Chat";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -164,7 +162,6 @@ function ReadOnlySchedule({
 function SharedPlanViewContent() {
   const params = useParams();
   const userId = params.userId as string;
-  const router = useRouter();
   const { user } = useAuth();
 
   const [selectedDate, setSelectedDate] = useState<Dayjs | null>(dayjs());
@@ -256,14 +253,7 @@ function SharedPlanViewContent() {
                 You are viewing plans shared by: {ownerDisplayName || userId}
               </Typography>
             </Box>
-            <Button
-              variant="contained"
-              startIcon={<ChatIcon />}
-              onClick={() => router.push(`/view/${userId}/chat`)}
-              sx={{ ml: 2 }}
-            >
-              Chat with AI
-            </Button>
+
           </Box>
 
           <LocalizationProvider dateAdapter={AdapterDayjs}>

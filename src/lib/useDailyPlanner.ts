@@ -85,6 +85,11 @@ interface UseDailyPlannerReturn {
   state: DailyPlannerState;
   loading: boolean;
   saving: boolean;
+  saveError: string | null;
+  pending: boolean;
+  retrySave: () => void;
+  loadError: string | null;
+  retryLoad: () => void;
   datesWithPlans: string[];
   updateField: <K extends keyof DailyPlannerState>(
     field: K,
@@ -95,86 +100,97 @@ interface UseDailyPlannerReturn {
 
 export function useDailyPlanner(): UseDailyPlannerReturn {
   const { user } = useAuth();
-  const [state, setState] = useState<DailyPlannerState>(createEmptyState());
+  const [state, setState] = useState<DailyPlannerState>(() => createEmptyState());
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [datesWithPlans, setDatesWithPlans] = useState<string[]>([]);
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const isInitialLoad = useRef(true);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
+  const stateRef = useRef(state);
+  const pendingRef = useRef(new Map<string, DailyPlannerState>());
+  const runningRef = useRef(false);
+  const loadRequestRef = useRef(0);
+  const uid = user?.uid;
+  const requestedDateRef = useRef(dayjs());
+  const draftKey = useCallback((date: string) => `pang-draft-v1:${uid}:${date}`, [uid]);
 
-  const lastSavedRef = useRef<DailyPlannerState | null>(null);
+  // Write drafts immediately; only remove them after the matching revision is acknowledged.
+  const queueDraft = useCallback((next: DailyPlannerState) => {
+    if (!uid || !next.date?.isValid()) return;
+    const date = next.date.format("YYYY-MM-DD");
+    pendingRef.current.set(date, next);
+    setPending(true);
+    try {
+      localStorage.setItem(draftKey(date), JSON.stringify(next));
+    } catch {
+      setSaveError("Local backup unavailable. Keep this page open until saved.");
+    }
+  }, [uid, draftKey]);
 
-  // Save state to Firestore with debounce
-  const saveState = useCallback(
-    async (stateToSave: DailyPlannerState) => {
-      if (JSON.stringify(lastSavedRef.current) === JSON.stringify(stateToSave)) {
-        return;
+  const flush = useCallback(async () => {
+    if (!uid || runningRef.current || !pendingRef.current.size) return;
+    runningRef.current = true;
+    setSaving(true);
+    try {
+      while (pendingRef.current.size) {
+        const [date, snapshot] = pendingRef.current.entries().next().value!;
+        await saveDailyPlan(uid, snapshot);
+        if (pendingRef.current.get(date) === snapshot) {
+          pendingRef.current.delete(date);
+          try {
+            // Another tab may have written a newer draft while this save was in flight.
+            if (localStorage.getItem(draftKey(date)) === JSON.stringify(snapshot)) {
+              localStorage.removeItem(draftKey(date));
+            }
+          } catch { /* Retry is safe. */ }
+        }
+        setDatesWithPlans(prev => prev.includes(date) ? prev : [...prev, date]);
       }
+      setSaveError(null);
+    } catch {
+      setSaveError("Couldn’t save to the cloud. Your draft will retry automatically.");
+    } finally {
+      runningRef.current = false;
+      setSaving(false);
+      setPending(pendingRef.current.size > 0);
+    }
+  }, [uid, draftKey]);
 
-      if (!user || !stateToSave.date) return;
+  const saveState = useCallback(async (next: DailyPlannerState) => {
+    queueDraft(next);
+    await flush();
+  }, [queueDraft, flush]);
 
-      setSaving(true);
-      try {
-        await saveDailyPlan(user.uid, stateToSave);
-        // Update dates with plans after saving
-        setDatesWithPlans((prev) => {
-          const currentDate = stateToSave.date?.format("YYYY-MM-DD");
-          return currentDate && !prev.includes(currentDate)
-            ? [...prev, currentDate]
-            : prev;
-        });
-      } catch (error) {
-        console.error("Error saving daily plan:", error);
-      } finally {
-        setSaving(false);
-      }
-    },
-    [user]
-  );
-
-  // Debounced save
-  const debouncedSave = useCallback(
-    (stateToSave: DailyPlannerState) => {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
-      }
-      saveTimeoutRef.current = setTimeout(() => {
-        saveState(stateToSave);
-      }, 1000); // 1 second debounce
-    },
-    [saveState]
-  );
+  const debouncedSave = useCallback((next: DailyPlannerState) => {
+    queueDraft(next);
+    if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+    saveTimeoutRef.current = setTimeout(() => { void flush(); }, 1000);
+  }, [queueDraft, flush]);
 
   // Load daily plan for a specific date
   const loadDailyPlan = useCallback(
     async (dateStr: string): Promise<DailyPlannerState | null> => {
-      if (!user) return null;
+      if (!uid) return null;
 
-      try {
-        const doc = await getDailyPlan(user.uid, dateStr);
-        if (doc) {
-          return documentToState(doc);
-        }
-        return null;
-      } catch (error) {
-        console.error("Error loading daily plan:", error);
-        return null;
-      }
+      const doc = await getDailyPlan(uid, dateStr);
+      return doc ? documentToState(doc) : null;
     },
-    [user]
+    [uid]
   );
 
   // Check if we should copy incomplete items from previous day
   const shouldCopyFromPrevious = useCallback(
     async (dateStr: string): Promise<DailyPlannerState | null> => {
-      if (!user) return null;
+      if (!uid) return null;
 
       // Only copy for today's date
       const isToday = dayjs(dateStr).isSame(dayjs(), "day");
       if (!isToday) return null;
 
       try {
-        const recentPlan = await getMostRecentDailyPlan(user.uid, dateStr);
+        const recentPlan = await getMostRecentDailyPlan(uid, dateStr);
         if (!recentPlan) return null;
 
         // Check if there are incomplete habits or priorities
@@ -207,97 +223,107 @@ export function useDailyPlanner(): UseDailyPlannerReturn {
         return null;
       }
     },
-    [user]
+    [uid]
   );
 
   // Change date and load corresponding data
   const changeDate = useCallback(
     async (newDate: Dayjs | null) => {
-      if (!newDate || !user) {
-        setState((prev) => ({ ...prev, date: newDate }));
-        return;
-      }
-
+      if (!newDate?.isValid() || !uid) return;
+      requestedDateRef.current = newDate;
+      void flush();
+      const request = ++loadRequestRef.current;
+      setLoadError(null);
       setLoading(true);
       const dateStr = newDate.format("YYYY-MM-DD");
 
       try {
-        // Try to load existing plan
-        const existingPlan = await loadDailyPlan(dateStr);
-
-        if (existingPlan) {
-          setState(existingPlan);
-        } else {
-          // No existing plan - check if we should copy from previous
-          const copiedState = await shouldCopyFromPrevious(dateStr);
-          if (copiedState) {
-            setState(copiedState);
-            // Save the copied state
-            await saveState(copiedState);
-          } else {
-            // Create empty state for this date
-            const emptyState = createEmptyState(newDate);
-            setState(emptyState);
+        let recovered: DailyPlannerState | null = pendingRef.current.get(dateStr) || null;
+        try {
+          const raw = localStorage.getItem(draftKey(dateStr));
+          if (raw && !recovered) {
+            const draft = JSON.parse(raw);
+            if (draft.date && dayjs(draft.date).format("YYYY-MM-DD") === dateStr) {
+              recovered = documentToState(draft);
+            }
           }
+        } catch { /* A corrupt backup must not prevent cloud loading. */ }
+        const existingPlan = recovered || await loadDailyPlan(dateStr);
+        const next = existingPlan || await shouldCopyFromPrevious(dateStr) || createEmptyState(newDate);
+        if (request !== loadRequestRef.current) return;
+        stateRef.current = next;
+        setState(next);
+        if (recovered || (!existingPlan && JSON.stringify(next) !== JSON.stringify(createEmptyState(newDate)))) {
+          void saveState(next);
         }
-      } catch (error) {
-        console.error("Error changing date:", error);
-        setState(createEmptyState(newDate));
+      } catch {
+        if (request === loadRequestRef.current) {
+          setLoadError("Couldn’t load this day. Retry before editing to protect your saved plan.");
+        }
       } finally {
-        setLoading(false);
+        if (request === loadRequestRef.current) setLoading(false);
       }
     },
-    [user, loadDailyPlan, shouldCopyFromPrevious, saveState]
+    [uid, loadDailyPlan, shouldCopyFromPrevious, saveState, flush, draftKey]
   );
 
   // Update a field in state and trigger save
   const updateField = useCallback(
     <K extends keyof DailyPlannerState>(field: K, value: DailyPlannerState[K]) => {
-      setState((prev) => {
-        const newState = { ...prev, [field]: value };
-        // Don't save on date change - that's handled separately
-        if (field !== "date") {
-          debouncedSave(newState);
-        }
-        return newState;
-      });
+      const next = { ...stateRef.current, [field]: value };
+      stateRef.current = next;
+      setState(next);
+      if (field !== "date") debouncedSave(next);
     },
     [debouncedSave]
   );
 
-  // Initial load
   useEffect(() => {
-    const initializeData = async () => {
-      if (!user) {
-        setDatesWithPlans([]);
-        setLoading(false);
-        return;
-      }
-
-      if (isInitialLoad.current) {
-        isInitialLoad.current = false;
-        const existingDates = await getDatesWithPlans(user.uid);
-        setDatesWithPlans(existingDates);
-        await changeDate(dayjs());
-      }
-    };
-    
-    initializeData();
-  }, [user, changeDate]);
-
-  // Cleanup timeout on unmount
-  useEffect(() => {
+    if (!uid) return;
+    let cancelled = false;
+    void getDatesWithPlans(uid).then(dates => {
+      if (!cancelled) setDatesWithPlans(dates);
+    }).catch(() => { /* Date markers are optional; day loading reports errors. */ });
+    void changeDate(dayjs());
     return () => {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
-      }
+      cancelled = true;
+      // This ref is a request counter, not a DOM node; invalidate outstanding loads.
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      loadRequestRef.current++;
     };
-  }, []);
+  }, [uid, changeDate]);
+
+  useEffect(() => {
+    const retry = () => { void flush(); };
+    const hidden = () => { if (document.visibilityState === "hidden") retry(); };
+    const warn = (event: BeforeUnloadEvent) => {
+      if (pendingRef.current.size) { event.preventDefault(); event.returnValue = ""; }
+    };
+    const interval = setInterval(retry, 15000);
+    window.addEventListener("online", retry);
+    window.addEventListener("pagehide", retry);
+    window.addEventListener("beforeunload", warn);
+    document.addEventListener("visibilitychange", hidden);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("online", retry);
+      window.removeEventListener("pagehide", retry);
+      window.removeEventListener("beforeunload", warn);
+      document.removeEventListener("visibilitychange", hidden);
+      if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+      void flush();
+    };
+  }, [flush]);
 
   return {
     state,
     loading,
     saving,
+    saveError,
+    pending,
+    retrySave: () => { void flush(); },
+    loadError,
+    retryLoad: () => { void changeDate(requestedDateRef.current); },
     datesWithPlans,
     updateField,
     changeDate,

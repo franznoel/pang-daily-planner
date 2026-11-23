@@ -39,3 +39,6 @@ jobs:
 
       - name: Run tests
         run: npx vitest run
+
+      - name: Run planner regression tests
+        run: npm run test:planner

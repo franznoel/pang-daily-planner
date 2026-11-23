@@ -46,6 +46,9 @@ jobs:
       - name: Run tests
         run: npx vitest run
 
+      - name: Run planner regression tests
+        run: npm run test:planner
+
       - name: Deploy to Firebase
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
